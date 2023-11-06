@@ -1,6 +1,6 @@
 import graphene
 from graphene_django import DjangoObjectType 
-from .models import User, Exercise, Session
+from .models import User, Exercise, WorkoutLog, SessionLog, SessionLog_Exercise
 
 class UserType(DjangoObjectType):
     class Meta:

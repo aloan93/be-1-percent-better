@@ -15,11 +15,10 @@ class Exercise(models.Model):
     personal_best = models.SmallIntegerField(default=0)
 
     def __str__(self):
-        return str(self.user_id) + " " + self.external_exercise_name
+        return 'User: ' + str(self.user_id) + ", Exercise: " + self.external_exercise_name
     
-class Session(models.Model):
-    session_id = models.AutoField(primary_key=True)
-    session_name = models.CharField(max_length=30, null=False)
+class WorkoutLog(models.Model):
+    workout_id = models.AutoField(primary_key=True)
     exercise_id = models.ForeignKey(Exercise, on_delete=models.CASCADE, null=False)
     date_time = models.DateTimeField(auto_now_add=True)
     reps = models.PositiveSmallIntegerField(null=False)
@@ -27,8 +26,22 @@ class Session(models.Model):
     sets = models.PositiveSmallIntegerField(null=False)
 
     def __str__(self):
-        return str(self.session_id) + " " + self.session_name
-
-
-
+        return 'Workout ID: ' + str(self.workout_id) + ", Exercise ID: " + str(self.exercise_id)
     
+class SessionLog(models.Model):
+    session_id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    date_time = models.DateTimeField(auto_now_add=True)
+    session_name = models.CharField(max_length=30, null=False)
+
+    def __str__(self):
+        return 'Session: ' + self.session_name
+
+
+class SessionLog_Exercise(models.Model):
+    session_exercise_id = models.AutoField(primary_key=True)
+    session_id = models.ForeignKey(SessionLog, on_delete=models.CASCADE, null=False)
+    exercise_id = models.ForeignKey(Exercise, on_delete=models.CASCADE, null=False)
+
+    def __str__(self):
+        return 'Session ID: ' + str(self.session_id) + ', Exercise ID: ' + str(self.exercise_id) 

@@ -1,0 +1,22 @@
+# To set up the virtual environment:
+python3 -m venv venv
+
+source venv/bin/activate
+
+# To install from the requirements.txt:
+pip install -r requirements.txt
+
+# Setting up MySQL in your environment (Linux): 
+sudo apt-get install mysql-client mysql-server libmysqlclient-dev
+pip3 install mysql-connector-python
+
+# Installing mysqlclient:
+pip3 install mysqlclient
+ 
+# If you get an error about a pkg-config:
+sudo apt-get update
+
+sudo apt install pkg-config
+
+# Try installing mysqlclient again:
+pip3 install mysqlclient

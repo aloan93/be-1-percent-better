@@ -10,7 +10,7 @@ class User(models.Model):
 class Exercise(models.Model):
     exercise_id = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    external_exercise_id = models.IntegerField(null=False)
+    external_exercise_id = models.CharField(max_length=4, null=False)
     external_exercise_name = models.CharField(max_length=100, null=False)
     external_exercise_bodypart = models.CharField(max_length=20, null=False)
     personal_best = models.SmallIntegerField(default=0)
@@ -36,7 +36,7 @@ class SessionLog(models.Model):
     session_name = models.CharField(max_length=30, null=False)
 
     def __str__(self):
-        return 'Session: ' + self.session_name
+        return 'User: ' + str(self.user_id) + ', Session: ' + self.session_name
 
 
 class SessionLog_Exercise(models.Model):

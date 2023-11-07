@@ -81,3 +81,30 @@ def test_get_all_exercises():
         }
     }
 
+@pytest.mark.django_db
+def test_get_users_by_user_id():
+    
+    testuser1 = User.objects.create(username='testuser1')
+    testuser2 = User.objects.create(username='testuser2')
+    
+   
+    query = '''
+       query {
+                getUserByUserId(userId: 6) {
+                    userId
+                    username
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed == {
+        'data': {
+            'getUserByUserId': 
+                {'userId': str(testuser2.user_id), 'username': testuser2.username}
+        }
+    }

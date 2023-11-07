@@ -10,6 +10,7 @@ class UserType(DjangoObjectType):
 class ExerciseType(DjangoObjectType):
     class Meta:
         model = Exercise
+        fields = '__all__'
 
 class Query(graphene.ObjectType):
 

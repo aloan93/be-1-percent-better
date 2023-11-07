@@ -22,6 +22,7 @@ class WorkoutLogType(DjangoObjectType):
         model = WorkoutLog
         fields = '__all__'
 
+
 class Query(graphene.ObjectType):
 
     get_all_users = graphene.List(UserType)

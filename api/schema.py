@@ -17,7 +17,7 @@ class Query(graphene.ObjectType):
     
     get_all_exercises = graphene.List(ExerciseType)
     get_exercises_by_user_id = graphene.List(ExerciseType, user_id=graphene.Int())
-
+    get_exercise_by_exercise_id = graphene.Field(ExerciseType, exercise_id=graphene.Int())
 
     def resolve_get_all_users(self, info):
         return User.objects.all()
@@ -30,5 +30,8 @@ class Query(graphene.ObjectType):
     
     def resolve_get_exercises_by_user_id(self, info, user_id):
         return Exercise.objects.filter(user_id=user_id)
+    
+    def resolve_get_exercise_by_exercise_id(self, info, exercise_id):
+        return Exercise.objects.get(pk=exercise_id)
 
 schema = graphene.Schema(query=Query)

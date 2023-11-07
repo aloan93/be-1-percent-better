@@ -108,3 +108,42 @@ def test_get_users_by_user_id():
                 {'userId': str(testuser2.user_id), 'username': testuser2.username}
         }
     }
+
+@pytest.mark.django_db
+def test_get_exercise_by_exercise_id():
+
+    testuserjim = User.objects.create(username='jimsgains')
+    testexercise = Exercise.objects.create(user_id=testuserjim, external_exercise_id='1004', external_exercise_name='Leg Press', external_exercise_bodypart='Lower Legs', personal_best=0)
+   
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: 3) {
+                exerciseId
+                externalExerciseId
+                externalExerciseName
+                externalExerciseBodypart
+                personalBest
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getExerciseByExerciseId': {
+                    'exerciseId': str(testexercise.exercise_id),
+                    'externalExerciseId': testexercise.external_exercise_id,
+                    'externalExerciseName': testexercise.external_exercise_name,
+                    'externalExerciseBodypart': testexercise.external_exercise_bodypart,
+                    'personalBest': testexercise.personal_best,
+                    'userId': {'userId': str(testuserjim.user_id), 'username': testuserjim.username}
+            }
+                
+        }
+    }

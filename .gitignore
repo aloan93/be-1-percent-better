@@ -1,4 +1,6 @@
 Venv/
 venv/
 myworld/
-.env/
+.env*
+__pycache__
+

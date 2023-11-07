@@ -12,6 +12,7 @@ class Exercise(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     external_exercise_id = models.IntegerField(null=False)
     external_exercise_name = models.CharField(max_length=100, null=False)
+    external_exercise_bodypart = models.CharField(max_length=20, null=False)
     personal_best = models.SmallIntegerField(default=0)
 
     def __str__(self):

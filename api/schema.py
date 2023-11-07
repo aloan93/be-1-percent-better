@@ -5,6 +5,7 @@ from .models import User, Exercise, WorkoutLog, SessionLog, SessionLog_Exercise
 class UserType(DjangoObjectType):
     class Meta:
         model = User
+        fields = '__all__'
 
 class Query(graphene.ObjectType):
 

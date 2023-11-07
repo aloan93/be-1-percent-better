@@ -147,3 +147,60 @@ def test_get_exercise_by_exercise_id():
                 
         }
     }
+
+@pytest.mark.django_db
+def test_get_exercises_by_user_id():
+
+    testuserjill = User.objects.create(username='jillsgains')
+
+    testexercise = Exercise.objects.create(user_id=testuserjill, external_exercise_id='1004', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=10)
+    testexercise2 = Exercise.objects.create(user_id=testuserjill, external_exercise_id='1024', external_exercise_name='Sumo Squat', external_exercise_bodypart='Upper Legs', personal_best=10)
+    testexercise3 = Exercise.objects.create(user_id=testuserjill, external_exercise_id='1324', external_exercise_name='Romanian Deadlift', external_exercise_bodypart='Upper Legs', personal_best=20)
+
+    query = '''
+       query {
+            getExercisesByUserId(userId: 8) {
+                exerciseId
+                externalExerciseId
+                externalExerciseName
+                externalExerciseBodypart
+                personalBest
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getExercisesByUserId': [{
+                    'exerciseId': str(testexercise.exercise_id),
+                    'externalExerciseId': testexercise.external_exercise_id,
+                    'externalExerciseName': testexercise.external_exercise_name,
+                    'externalExerciseBodypart': testexercise.external_exercise_bodypart,
+                    'personalBest': testexercise.personal_best,
+                    'userId': {'userId': str(testuserjill.user_id), 'username': testuserjill.username}
+            },{
+                    'exerciseId': str(testexercise2.exercise_id),
+                    'externalExerciseId': testexercise2.external_exercise_id,
+                    'externalExerciseName': testexercise2.external_exercise_name,
+                    'externalExerciseBodypart': testexercise2.external_exercise_bodypart,
+                    'personalBest': testexercise2.personal_best,
+                    'userId': {'userId': str(testuserjill.user_id), 'username': testuserjill.username}
+            },{
+                    'exerciseId': str(testexercise3.exercise_id),
+                    'externalExerciseId': testexercise3.external_exercise_id,
+                    'externalExerciseName': testexercise3.external_exercise_name,
+                    'externalExerciseBodypart': testexercise3.external_exercise_bodypart,
+                    'personalBest': testexercise3.personal_best,
+                    'userId': {'userId': str(testuserjill.user_id), 'username': testuserjill.username}
+            }
+            ]
+                
+        }
+    }

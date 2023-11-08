@@ -81,6 +81,65 @@ def test_get_all_exercises():
         }
     }
 
+
+@pytest.mark.django_db
+def test_get_all_exercises_first():
+
+    query = '''
+        query {
+            getAllExercises {
+                exerciseId
+                externalExerciseId
+                externalExerciseName
+                externalExerciseBodypart
+                personalBest
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    client = Client(schema)
+    executed = client.execute(query)
+    assert executed == {
+        'data': {
+            'getAllExercises': []
+        }
+    }
+
+@pytest.mark.django_db
+def test_get_users_by_nonexisting_user_id():
+    
+   
+    query = '''
+       query {
+                getUserByUserId(userId: 344) {
+                    userId
+                    username
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed == {
+        'data': {
+            'getUserByUserId': 
+                None
+        },
+        'errors': [{
+            'locations': [{
+                        'column': 17,
+                        'line': 3}],
+            'message': 'User matching query does not exist.',
+            'path': ['getUserByUserId']}],
+            
+    }
+
 @pytest.mark.django_db
 def test_get_users_by_user_id():
     
@@ -206,7 +265,7 @@ def test_get_exercises_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_all_workouts():
+def test_get_all_workouts_first():
 
 
     query = '''
@@ -234,8 +293,7 @@ def test_get_all_workouts():
   
     assert executed == {
         'data': {
-            'getAllWorkouts': [{
-                }]
+            'getAllWorkouts': []
                 },
     }
 

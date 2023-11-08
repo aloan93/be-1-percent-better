@@ -261,6 +261,22 @@ class SessionMutationDelete(graphene.Mutation):
         session = SessionLog.objects.get(session_id=session_id)
         session.delete()
         return
+    
+class SessionExerciseMutationCreate(graphene.Mutation):
+
+    class Arguments:
+        session_id = graphene.ID()
+        exercise_id = graphene.ID()
+
+    session_exercise = graphene.Field(SessionLog_ExerciseType)
+
+    @classmethod
+    def mutate(cls, root, info, session_id, exercise_id):
+        session_obj = SessionLog.objects.get(session_id=session_id)
+        exercise_obj = Exercise.objects.get(exercise_id=exercise_id)
+        session_exercise = SessionLog_Exercise(session_id=session_obj, exercise_id=exercise_obj)
+        session_exercise.save()
+        return SessionExerciseMutationCreate(session_exercise=session_exercise)
 
 
 class Mutation(graphene.ObjectType):
@@ -280,6 +296,8 @@ class Mutation(graphene.ObjectType):
     create_session = SessionMutationCreate.Field()
     update_session = SessionMutationUpdate.Field()
     delete_session = SessionMutationDelete.Field()
+
+    create_session_exercise = SessionExerciseMutationCreate.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

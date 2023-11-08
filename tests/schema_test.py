@@ -1,6 +1,6 @@
 from graphene.test import Client
 from api.schema import schema
-from api.models import User, Exercise
+from api.models import User, Exercise, WorkoutLog
 import pytest
 
 @pytest.mark.django_db
@@ -203,4 +203,88 @@ def test_get_exercises_by_user_id():
             ]
                 
         }
+    }
+
+@pytest.mark.django_db
+def test_get_all_workouts():
+
+
+    query = '''
+       query {
+            getAllWorkouts {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                }
+                }
+               
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getAllWorkouts': [{
+                }]
+                },
+    }
+
+
+@pytest.mark.django_db
+def test_get_all_workouts():
+
+    testuserjames = User.objects.create(username='jamesgains')
+
+    workoutexercise = Exercise.objects.create(user_id=testuserjames, external_exercise_id='1304', external_exercise_name='Glute Bridge Test', external_exercise_bodypart='Upper Legs', personal_best=20)
+    testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 12, sets=3, weight_kg=20)
+
+    query = '''
+       query {
+            getAllWorkouts {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                }
+                }
+               
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getAllWorkouts': [{
+                'exerciseId': {'exerciseId': str(workoutexercise.exercise_id),
+                               'externalExerciseName': workoutexercise.external_exercise_name,
+                               'userId': {
+                                   'userId': str(testuserjames.user_id),
+                                   'username': testuserjames.username
+                               }
+                               },
+                'reps': testworkout.reps,
+                'sets': testworkout.sets,
+                'weightKg': testworkout.weight_kg,
+                'workoutId': str(testworkout.workout_id)
+                }]
+                },
     }

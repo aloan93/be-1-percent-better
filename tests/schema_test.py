@@ -1,6 +1,6 @@
 from graphene.test import Client
 from api.schema import schema
-from api.models import User, Exercise, WorkoutLog
+from api.models import User, Exercise, WorkoutLog, SessionLog
 import pytest
 
 @pytest.mark.django_db
@@ -154,19 +154,15 @@ def test_get_users_by_nonexisting_user_id():
     executed = client.execute(query)
     
   
-    assert executed == {
-        'data': {
-            'getUserByUserId': 
-                None
-        },
-        'errors': [{
-            'locations': [{
+    assert executed['data'] ==  {'getUserByUserId': None}
+
+    assert executed['errors'] == [{
+        'locations': [{
                         'column': 17,
                         'line': 3}],
             'message': 'User matching query does not exist.',
-            'path': ['getUserByUserId']}],
-            
-    }
+            'path': ['getUserByUserId']}]
+    
 
 @pytest.mark.django_db
 def test_get_users_by_invalid_string_user_id():
@@ -174,7 +170,7 @@ def test_get_users_by_invalid_string_user_id():
    
     query = '''
        query {
-                getUserByUserId(userId: 'banana') {
+                getUserByUserId(userId: banana) {
                     userId
                     username
             }
@@ -187,8 +183,12 @@ def test_get_users_by_invalid_string_user_id():
     
   
     assert executed['data'] == None
-    assert executed['errors']
-
+    assert executed['errors'] == [{
+            'locations': [{
+                'column': 41,
+                'line': 3}],
+            'message': "Int cannot represent non-integer value: banana"
+    }]
 
 @pytest.mark.django_db
 def test_get_exercise_by_exercise_id():
@@ -228,6 +228,142 @@ def test_get_exercise_by_exercise_id():
                 
         }
     }
+
+@pytest.mark.django_db
+def test_get_exercise_by_nonexisting_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: 60004) {
+                exerciseId
+                externalExerciseId
+                externalExerciseName
+                externalExerciseBodypart
+                personalBest
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getExerciseByExerciseId': None}
+    assert executed['errors'] == [{'locations': [{'column': 13,
+                                                  'line': 3}],
+                                    'message': 'Exercise matching query does not exist.',
+                                    'path': ['getExerciseByExerciseId']}] 
+
+@pytest.mark.django_db
+def test_get_exercise_by_invalid_string_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: '4397584395') {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': "Syntax Error: Unexpected single quote character ('), did you " 'mean to use a double quote (")?'},
+                                    ]
+
+
+@pytest.mark.django_db
+def test_get_exercise_by_invalid_double_string_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: "43975") {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': 'Int cannot represent non-integer value: "43975"'
+                                    },
+                                    ]
+
+@pytest.mark.django_db
+def test_get_exercise_by_boolean_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: True) {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': 'Int cannot represent non-integer value: True'
+                                    },
+                                    ]
+
+@pytest.mark.django_db
+def test_get_exercise_by_blank_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: ) {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': "Syntax Error: Unexpected ')'."
+                                    },
+                                    ]
 
 @pytest.mark.django_db
 def test_get_exercises_by_user_id():
@@ -287,8 +423,278 @@ def test_get_exercises_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_all_workouts_is_empty():
+def test_get_exercises_by_nonexisting_user_id():  
+   
+    query = '''
+       query {
+                getExercisesByUserId(userId: 344) {
+                    exerciseId
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+    
+  
+    assert executed['data'] == {'getExercisesByUserId': []} 
 
+@pytest.mark.django_db
+def test_get_exercises_by_invalid_string_user_id():
+    
+    query = '''
+       query {
+                getExercisesByUserId(userId: banana) {
+                    exerciseId
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{
+            'locations': [{
+                'column': 46,
+                'line': 3}],
+            'message': "Int cannot represent non-integer value: banana"
+    }]
+    
+
+@pytest.mark.django_db
+def test_get_all_sessions_is_empty():
+
+    query = '''
+        query {
+              getAllSessions {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getAllSessions': []}
+
+@pytest.mark.django_db
+def test_get_all_sessions():
+
+    testusercraig = User.objects.create(username='craigsgains')
+
+    testsession = SessionLog.objects.create(user_id=testusercraig, session_name="Leg Day")
+
+    query = '''
+        query {
+              getAllSessions {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data':  {'getAllSessions': [{
+                        'sessionId': str(testsession.session_id),
+                        'sessionName': testsession.session_name,
+                        'userId': {
+                            'userId': str(testusercraig.user_id),
+                            'username': testusercraig.username
+                            }
+                        }]
+                    },
+    }
+
+@pytest.mark.django_db
+def test_get_sessions_by_user_id():
+
+    testuser = User.objects.create(username="testing")
+
+    testsession = SessionLog.objects.create(user_id=testuser, session_name="Test Chest Day")
+
+    query = '''
+        query {
+              getSessionsByUserId(userId: 14) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data':  {'getSessionsByUserId': [{
+                        'sessionId': str(testsession.session_id),
+                        'sessionName': testsession.session_name,
+                        'userId': {
+                            'userId': str(testuser.user_id),
+                            'username': testuser.username
+                            }
+                        }]
+                    },
+    }
+
+@pytest.mark.django_db
+def test_get_sessions_by_nonexisting_user_id():
+
+    query = '''
+        query {
+              getSessionsByUserId(userId: 555555) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getSessionsByUserId': []}
+
+@pytest.mark.django_db
+def test_get_sessions_by_invalid_user_id():
+
+    query = '''
+        query {
+              getSessionsByUserId(userId: "banana") {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{'column': 43, 'line': 3}], 'message': 'Int cannot represent non-integer value: "banana"'}]
+
+@pytest.mark.django_db
+def test_get_session_by_session_id():
+
+    testuser = User.objects.create(username="testing")
+
+    testsession = SessionLog.objects.create(user_id=testuser, session_name="Test Leg Day")
+
+    query = '''
+        query {
+              getSessionBySessionId(sessionId: 5) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data':  {'getSessionBySessionId': {
+                        'sessionId': str(testsession.session_id),
+                        'sessionName': testsession.session_name,
+                        'userId': {
+                            'userId': str(testuser.user_id),
+                            'username': testuser.username
+                            }
+                        }
+                    },
+    }
+
+@pytest.mark.django_db
+def test_get_session_by_nonexisting_session_id():
+
+    query = '''
+        query {
+              getSessionBySessionId(sessionId: 555555) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getSessionBySessionId': None}
+    assert executed['errors'] == [{
+                    'locations': [{'column': 15,
+                                   'line': 3}],
+                    'message': 'SessionLog matching query does not exist.',
+                    'path': ['getSessionBySessionId']
+    }]
+    
+
+@pytest.mark.django_db
+def test_get_session_by_invalid_session_id():
+
+    query = '''
+        query {
+              getSessionBySessionId(sessionId: "banana") {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{'column': 48, 'line': 3}],
+                                    'message':'Int cannot represent non-integer value: "banana"'
+                                    }]
+
+@pytest.mark.django_db
+def test_get_all_workouts_is_empty():
 
     query = '''
        query {
@@ -318,7 +724,6 @@ def test_get_all_workouts_is_empty():
             'getAllWorkouts': []
                 },
     }
-
 
 @pytest.mark.django_db
 def test_get_all_workouts():

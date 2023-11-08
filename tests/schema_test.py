@@ -83,7 +83,7 @@ def test_get_all_exercises():
 
 
 @pytest.mark.django_db
-def test_get_all_exercises_first():
+def test_get_all_exercises_is_empty():
 
     query = '''
         query {
@@ -105,6 +105,34 @@ def test_get_all_exercises_first():
     assert executed == {
         'data': {
             'getAllExercises': []
+        }
+    }
+
+@pytest.mark.django_db
+def test_get_users_by_user_id():
+    
+    testuser1 = User.objects.create(username='testuser1')
+    testuser2 = User.objects.create(username='testuser2')
+    
+   
+    query = '''
+       query {
+                getUserByUserId(userId: 10) {
+                    userId
+                    username
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed == {
+        'data': {
+            'getUserByUserId': 
+                {'userId': str(testuser2.user_id), 'username': testuser2.username}
         }
     }
 
@@ -141,15 +169,12 @@ def test_get_users_by_nonexisting_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_users_by_user_id():
-    
-    testuser1 = User.objects.create(username='testuser1')
-    testuser2 = User.objects.create(username='testuser2')
+def test_get_users_by_invalid_string_user_id():
     
    
     query = '''
        query {
-                getUserByUserId(userId: 10) {
+                getUserByUserId(userId: 'banana') {
                     userId
                     username
             }
@@ -161,12 +186,9 @@ def test_get_users_by_user_id():
     executed = client.execute(query)
     
   
-    assert executed == {
-        'data': {
-            'getUserByUserId': 
-                {'userId': str(testuser2.user_id), 'username': testuser2.username}
-        }
-    }
+    assert executed['data'] == None
+    assert executed['errors']
+
 
 @pytest.mark.django_db
 def test_get_exercise_by_exercise_id():
@@ -265,7 +287,7 @@ def test_get_exercises_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_all_workouts_first():
+def test_get_all_workouts_is_empty():
 
 
     query = '''

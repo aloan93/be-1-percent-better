@@ -157,6 +157,19 @@ class ExerciseMutationUpdate(graphene.Mutation):
         exercise.save()
         return ExerciseMutationUpdate(exercise=exercise)
 
+class ExerciseMutationDelete(graphene.Mutation):
+
+    class Arguments:
+        exercise_id = graphene.ID(required=True)
+
+    exercise = graphene.Field(ExerciseType)
+
+    @classmethod
+    def mutate(cls, root, info, exercise_id):
+        exercise = Exercise.objects.get(exercise_id=exercise_id)
+        exercise.delete()
+        return
+
 
 class Mutation(graphene.ObjectType):
 
@@ -166,5 +179,7 @@ class Mutation(graphene.ObjectType):
 
     create_exercise = ExerciseMutationCreate.Field()
     update_exercise = ExerciseMutationUpdate.Field()
+    delete_exercise = ExerciseMutationDelete.Field()
+
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

@@ -206,7 +206,7 @@ def test_get_exercises_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_all_workouts():
+def test_get_all_workouts_first():
 
 
     query = '''
@@ -234,8 +234,7 @@ def test_get_all_workouts():
   
     assert executed == {
         'data': {
-            'getAllWorkouts': [{
-                }]
+            'getAllWorkouts': []
                 },
     }
 

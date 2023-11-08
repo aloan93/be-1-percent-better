@@ -112,9 +112,23 @@ class UserMutationUpdate(graphene.Mutation):
         return UserMutationUpdate(user = user)
 
 
+class UserMutationDelete(graphene.Mutation):
+
+    class Arguments:
+        user_id = graphene.ID(required = True)
+
+    user = graphene.Field(UserType)
+
+    @classmethod
+    def mutate(cls, root, info, user_id):
+        user = User.objects.get(user_id = user_id)
+        user.delete()
+        return
+
 class Mutation(graphene.ObjectType):
 
     create_user = UserMutationCreate.Field()
-    update_user = UserMutationUpdate.Field() 
+    update_user = UserMutationUpdate.Field()
+    delete_user = UserMutationDelete.Field() 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

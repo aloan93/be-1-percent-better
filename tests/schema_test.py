@@ -230,57 +230,140 @@ def test_get_exercise_by_exercise_id():
     }
 
 @pytest.mark.django_db
-def test_get_exercises_by_nonexisting_user_id():
-    
-   
+def test_get_exercise_by_nonexisting_exercise_id():
+
     query = '''
        query {
-                getExercisesByUserId(userId: 344) {
-                    exerciseId
-                    userId {
-                        userId
-                        username
-                    }
+            getExerciseByExerciseId(exerciseId: 60004) {
+                exerciseId
+                externalExerciseId
+                externalExerciseName
+                externalExerciseBodypart
+                personalBest
+                userId {
+                    userId
+                    username
+                }
             }
         }
     '''
     
     client = Client(schema)
-    
     executed = client.execute(query)
-    
   
-    assert executed['data'] == {'getExercisesByUserId': []}
+    assert executed['data'] == {'getExerciseByExerciseId': None}
+    assert executed['errors'] == [{'locations': [{'column': 13,
+                                                  'line': 3}],
+                                    'message': 'Exercise matching query does not exist.',
+                                    'path': ['getExerciseByExerciseId']}] 
 
 @pytest.mark.django_db
-def test_get_exercises_by_invalid_string_user_id():
-    
-   
+def test_get_exercise_by_invalid_string_exercise_id():
+
     query = '''
        query {
-                getExercisesByUserId(userId: banana) {
-                    exerciseId
-                    userId {
-                        userId
-                        username
-                    }
+            getExerciseByExerciseId(exerciseId: '4397584395') {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
             }
         }
     '''
     
     client = Client(schema)
-    
     executed = client.execute(query)
-    
   
     assert executed['data'] == None
-    assert executed['errors'] == [{
-            'locations': [{
-                'column': 46,
-                'line': 3}],
-            'message': "Int cannot represent non-integer value: banana"
-    }]
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': "Syntax Error: Unexpected single quote character ('), did you " 'mean to use a double quote (")?'},
+                                    ]
 
+
+@pytest.mark.django_db
+def test_get_exercise_by_invalid_double_string_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: "43975") {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': 'Int cannot represent non-integer value: "43975"'
+                                    },
+                                    ]
+
+@pytest.mark.django_db
+def test_get_exercise_by_boolean_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: True) {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': 'Int cannot represent non-integer value: True'
+                                    },
+                                    ]
+
+@pytest.mark.django_db
+def test_get_exercise_by_blank_exercise_id():
+
+    query = '''
+       query {
+            getExerciseByExerciseId(exerciseId: ) {
+                exerciseId
+                externalExerciseId
+                userId {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{
+                                        'column': 49,
+                                        'line': 3}],
+                                    'message': "Syntax Error: Unexpected ')'."
+                                    },
+                                    ]
 
 @pytest.mark.django_db
 def test_get_exercises_by_user_id():
@@ -338,6 +421,55 @@ def test_get_exercises_by_user_id():
                 
         }
     }
+
+@pytest.mark.django_db
+def test_get_exercises_by_nonexisting_user_id():  
+   
+    query = '''
+       query {
+                getExercisesByUserId(userId: 344) {
+                    exerciseId
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(query)
+    
+  
+    assert executed['data'] == {'getExercisesByUserId': []} 
+
+@pytest.mark.django_db
+def test_get_exercises_by_invalid_string_user_id():
+    
+    query = '''
+       query {
+                getExercisesByUserId(userId: banana) {
+                    exerciseId
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{
+            'locations': [{
+                'column': 46,
+                'line': 3}],
+            'message': "Int cannot represent non-integer value: banana"
+    }]
 
 @pytest.mark.django_db
 def test_get_all_workouts_is_empty():

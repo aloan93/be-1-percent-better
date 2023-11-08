@@ -725,7 +725,6 @@ def test_get_all_workouts_is_empty():
                 },
     }
 
-
 @pytest.mark.django_db
 def test_get_all_workouts():
 

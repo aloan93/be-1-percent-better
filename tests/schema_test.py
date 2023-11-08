@@ -189,8 +189,6 @@ def test_get_users_by_invalid_string_user_id():
                 'line': 3}],
             'message': "Int cannot represent non-integer value: banana"
     }]
-    
-
 
 @pytest.mark.django_db
 def test_get_exercise_by_exercise_id():
@@ -230,6 +228,59 @@ def test_get_exercise_by_exercise_id():
                 
         }
     }
+
+@pytest.mark.django_db
+def test_get_exercises_by_nonexisting_user_id():
+    
+   
+    query = '''
+       query {
+                getExercisesByUserId(userId: 344) {
+                    exerciseId
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed['data'] == {'getExercisesByUserId': []}
+
+@pytest.mark.django_db
+def test_get_exercises_by_invalid_string_user_id():
+    
+   
+    query = '''
+       query {
+                getExercisesByUserId(userId: banana) {
+                    exerciseId
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    
+    executed = client.execute(query)
+    
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{
+            'locations': [{
+                'column': 46,
+                'line': 3}],
+            'message': "Int cannot represent non-integer value: banana"
+    }]
+
 
 @pytest.mark.django_db
 def test_get_exercises_by_user_id():

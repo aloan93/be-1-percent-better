@@ -141,6 +141,22 @@ class ExerciseMutationCreate(graphene.Mutation):
         exercise = Exercise(user_id=user_obj, external_exercise_id=external_exercise_id, external_exercise_name=external_exercise_name, external_exercise_bodypart=external_exercise_bodypart)
         exercise.save()
         return ExerciseMutationCreate(exercise=exercise)
+    
+class ExerciseMutationUpdate(graphene.Mutation):
+
+    class Arguments:
+        exercise_id = graphene.ID(required=True)
+        personal_best = graphene.Int(required=True)
+
+    exercise = graphene.Field(ExerciseType)
+
+    @classmethod
+    def mutate(cls, root, info, exercise_id, personal_best):
+        exercise = Exercise.objects.get(exercise_id=exercise_id)
+        exercise.personal_best = personal_best
+        exercise.save()
+        return ExerciseMutationUpdate(exercise=exercise)
+
 
 class Mutation(graphene.ObjectType):
 
@@ -149,5 +165,6 @@ class Mutation(graphene.ObjectType):
     delete_user = UserMutationDelete.Field()
 
     create_exercise = ExerciseMutationCreate.Field()
+    update_exercise = ExerciseMutationUpdate.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

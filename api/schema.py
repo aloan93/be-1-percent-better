@@ -53,7 +53,7 @@ class Query(graphene.ObjectType):
     def resolve_get_user_by_user_id(self, info, user_id):
         return User.objects.get(pk=user_id)
     
-    def resolve_get_all_exercises(self, infor):
+    def resolve_get_all_exercises(self, info):
         return Exercise.objects.all()
     
     def resolve_get_exercises_by_user_id(self, info, user_id):
@@ -83,6 +83,52 @@ class Query(graphene.ObjectType):
     def resolve_get_exercises_by_session_id(self, info, session_id):
         return SessionLog_Exercise.objects.filter(session_id=session_id)
     
+class UserMutationCreate(graphene.Mutation):
+
+    class Arguments:
+        username= graphene.String(required=True)
+
+    user = graphene.Field(UserType)
+
+    @classmethod
+    def mutate(cls, root, info, username):
+        user = User(username=username)
+        user.save()
+        return UserMutationCreate(user = user)
+
+class UserMutationUpdate(graphene.Mutation):
+
+    class Arguments:
+        user_id = graphene.ID(required = True)
+        username = graphene.String(required = True)
+    
+    user = graphene.Field(UserType)
+
+    @classmethod
+    def mutate(cls, root, info, user_id, username):
+        user = User.objects.get(user_id = user_id)
+        user.username = username
+        user.save()
+        return UserMutationUpdate(user = user)
 
 
-schema = graphene.Schema(query=Query)
+class UserMutationDelete(graphene.Mutation):
+
+    class Arguments:
+        user_id = graphene.ID(required = True)
+
+    user = graphene.Field(UserType)
+
+    @classmethod
+    def mutate(cls, root, info, user_id):
+        user = User.objects.get(user_id = user_id)
+        user.delete()
+        return
+
+class Mutation(graphene.ObjectType):
+
+    create_user = UserMutationCreate.Field()
+    update_user = UserMutationUpdate.Field()
+    delete_user = UserMutationDelete.Field() 
+
+schema = graphene.Schema(query=Query, mutation=Mutation)

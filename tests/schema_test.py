@@ -117,7 +117,7 @@ def test_get_users_by_user_id():
    
     query = '''
        query {
-                getUserByUserId(userId: 6) {
+                getUserByUserId(userId: 10) {
                     userId
                     username
             }
@@ -198,7 +198,7 @@ def test_get_exercise_by_exercise_id():
    
     query = '''
        query {
-            getExerciseByExerciseId(exerciseId: 3) {
+            getExerciseByExerciseId(exerciseId: 6) {
                 exerciseId
                 externalExerciseId
                 externalExerciseName
@@ -240,7 +240,7 @@ def test_get_exercises_by_user_id():
 
     query = '''
        query {
-            getExercisesByUserId(userId: 8) {
+            getExercisesByUserId(userId: 12) {
                 exerciseId
                 externalExerciseId
                 externalExerciseName

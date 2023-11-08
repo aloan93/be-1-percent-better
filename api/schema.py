@@ -170,6 +170,23 @@ class ExerciseMutationDelete(graphene.Mutation):
         exercise.delete()
         return
 
+class WorkoutMutationCreate(graphene.Mutation):
+
+    class Arguments:
+        exercise_id = graphene.ID(required=True)
+        weight_kg = graphene.Int(required=True)
+        reps = graphene.Int(required=True)
+        sets = graphene.Int(required=True)
+
+    workout = graphene.Field(WorkoutLogType)
+
+    @classmethod
+    def mutate(cls, root, info, exercise_id, weight_kg, reps, sets):
+        exercise_obj = Exercise.objects.get(exercise_id=exercise_id)
+        workout = WorkoutLog(exercise_id=exercise_obj, weight_kg=weight_kg, reps=reps, sets=sets)
+        workout.save()
+        return WorkoutMutationCreate(workout=workout)
+
 
 class Mutation(graphene.ObjectType):
 
@@ -180,6 +197,8 @@ class Mutation(graphene.ObjectType):
     create_exercise = ExerciseMutationCreate.Field()
     update_exercise = ExerciseMutationUpdate.Field()
     delete_exercise = ExerciseMutationDelete.Field()
+
+    create_workout = WorkoutMutationCreate.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

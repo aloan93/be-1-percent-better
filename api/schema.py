@@ -53,7 +53,7 @@ class Query(graphene.ObjectType):
     def resolve_get_user_by_user_id(self, info, user_id):
         return User.objects.get(pk=user_id)
     
-    def resolve_get_all_exercises(self, infor):
+    def resolve_get_all_exercises(self, info):
         return Exercise.objects.all()
     
     def resolve_get_exercises_by_user_id(self, info, user_id):
@@ -83,6 +83,21 @@ class Query(graphene.ObjectType):
     def resolve_get_exercises_by_session_id(self, info, session_id):
         return SessionLog_Exercise.objects.filter(session_id=session_id)
     
+class UserMutationCreate(graphene.Mutation):
 
+    class Arguments:
+        username= graphene.String(required=True)
 
-schema = graphene.Schema(query=Query)
+    user = graphene.Field(UserType)
+
+    @classmethod
+    def mutate(cls, root, info, username):
+        user = User(username=username)
+        user.save()
+        return UserMutationCreate(user = user)
+
+class Mutation(graphene.ObjectType):
+
+    create_user = UserMutationCreate.Field() 
+
+schema = graphene.Schema(query=Query, mutation=Mutation)

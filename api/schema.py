@@ -96,8 +96,25 @@ class UserMutationCreate(graphene.Mutation):
         user.save()
         return UserMutationCreate(user = user)
 
+class UserMutationUpdate(graphene.Mutation):
+
+    class Arguments:
+        user_id = graphene.ID(required = True)
+        username = graphene.String(required = True)
+    
+    user = graphene.Field(UserType)
+
+    @classmethod
+    def mutate(cls, root, info, user_id, username):
+        user = User.objects.get(user_id = user_id)
+        user.username = username
+        user.save()
+        return UserMutationUpdate(user = user)
+
+
 class Mutation(graphene.ObjectType):
 
-    create_user = UserMutationCreate.Field() 
+    create_user = UserMutationCreate.Field()
+    update_user = UserMutationUpdate.Field() 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

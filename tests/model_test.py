@@ -51,3 +51,4 @@ def test_create_session_log_exercise():
     assert session_log_exercise.exercise_id.external_exercise_name == 'Squat', "Session log exercise's name does not match the expected value."
     assert session_log_exercise.session_id.session_name == 'Test Session', "Session log exercise's session name does not match the expected value."
     assert session_log_exercise.session_id.user_id.username == 'testuser', "Exercise's user username does not match the expected value."
+

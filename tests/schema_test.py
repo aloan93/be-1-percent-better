@@ -154,19 +154,15 @@ def test_get_users_by_nonexisting_user_id():
     executed = client.execute(query)
     
   
-    assert executed == {
-        'data': {
-            'getUserByUserId': 
-                None
-        },
-        'errors': [{
-            'locations': [{
+    assert executed['data'] ==  {'getUserByUserId': None}
+
+    assert executed['errors'] == [{
+        'locations': [{
                         'column': 17,
                         'line': 3}],
             'message': 'User matching query does not exist.',
-            'path': ['getUserByUserId']}],
-            
-    }
+            'path': ['getUserByUserId']}]
+    
 
 @pytest.mark.django_db
 def test_get_users_by_invalid_string_user_id():
@@ -174,7 +170,7 @@ def test_get_users_by_invalid_string_user_id():
    
     query = '''
        query {
-                getUserByUserId(userId: 'banana') {
+                getUserByUserId(userId: banana) {
                     userId
                     username
             }
@@ -187,7 +183,13 @@ def test_get_users_by_invalid_string_user_id():
     
   
     assert executed['data'] == None
-    assert executed['errors']
+    assert executed['errors'] == [{
+            'locations': [{
+                'column': 41,
+                'line': 3}],
+            'message': "Int cannot represent non-integer value: banana"
+    }]
+    
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 from graphene.test import Client
 from api.schema import schema
-from api.models import User, Exercise, WorkoutLog
+from api.models import User, Exercise, WorkoutLog, SessionLog
 import pytest
 
 @pytest.mark.django_db
@@ -470,10 +470,231 @@ def test_get_exercises_by_invalid_string_user_id():
                 'line': 3}],
             'message': "Int cannot represent non-integer value: banana"
     }]
+    
+
+@pytest.mark.django_db
+def test_get_all_sessions_is_empty():
+
+    query = '''
+        query {
+              getAllSessions {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+            }
+        }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getAllSessions': []}
+
+@pytest.mark.django_db
+def test_get_all_sessions():
+
+    testusercraig = User.objects.create(username='craigsgains')
+
+    testsession = SessionLog.objects.create(user_id=testusercraig, session_name="Leg Day")
+
+    query = '''
+        query {
+              getAllSessions {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data':  {'getAllSessions': [{
+                        'sessionId': str(testsession.session_id),
+                        'sessionName': testsession.session_name,
+                        'userId': {
+                            'userId': str(testusercraig.user_id),
+                            'username': testusercraig.username
+                            }
+                        }]
+                    },
+    }
+
+@pytest.mark.django_db
+def test_get_sessions_by_user_id():
+
+    testuser = User.objects.create(username="testing")
+
+    testsession = SessionLog.objects.create(user_id=testuser, session_name="Test Chest Day")
+
+    query = '''
+        query {
+              getSessionsByUserId(userId: 14) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data':  {'getSessionsByUserId': [{
+                        'sessionId': str(testsession.session_id),
+                        'sessionName': testsession.session_name,
+                        'userId': {
+                            'userId': str(testuser.user_id),
+                            'username': testuser.username
+                            }
+                        }]
+                    },
+    }
+
+@pytest.mark.django_db
+def test_get_sessions_by_nonexisting_user_id():
+
+    query = '''
+        query {
+              getSessionsByUserId(userId: 555555) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getSessionsByUserId': []}
+
+@pytest.mark.django_db
+def test_get_sessions_by_invalid_user_id():
+
+    query = '''
+        query {
+              getSessionsByUserId(userId: "banana") {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{'column': 43, 'line': 3}], 'message': 'Int cannot represent non-integer value: "banana"'}]
+
+@pytest.mark.django_db
+def test_get_session_by_session_id():
+
+    testuser = User.objects.create(username="testing")
+
+    testsession = SessionLog.objects.create(user_id=testuser, session_name="Test Leg Day")
+
+    query = '''
+        query {
+              getSessionBySessionId(sessionId: 5) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data':  {'getSessionBySessionId': {
+                        'sessionId': str(testsession.session_id),
+                        'sessionName': testsession.session_name,
+                        'userId': {
+                            'userId': str(testuser.user_id),
+                            'username': testuser.username
+                            }
+                        }
+                    },
+    }
+
+@pytest.mark.django_db
+def test_get_session_by_nonexisting_session_id():
+
+    query = '''
+        query {
+              getSessionBySessionId(sessionId: 555555) {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == {'getSessionBySessionId': None}
+    assert executed['errors'] == [{
+                    'locations': [{'column': 15,
+                                   'line': 3}],
+                    'message': 'SessionLog matching query does not exist.',
+                    'path': ['getSessionBySessionId']
+    }]
+    
+
+@pytest.mark.django_db
+def test_get_session_by_invalid_session_id():
+
+    query = '''
+        query {
+              getSessionBySessionId(sessionId: "banana") {
+                    sessionId
+                    sessionName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        '''
+       
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed['data'] == None
+    assert executed['errors'] == [{'locations': [{'column': 48, 'line': 3}],
+                                    'message':'Int cannot represent non-integer value: "banana"'
+                                    }]
 
 @pytest.mark.django_db
 def test_get_all_workouts_is_empty():
-
 
     query = '''
        query {

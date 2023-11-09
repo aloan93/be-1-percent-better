@@ -2014,3 +2014,140 @@ def test_delete_session_fail_nonexistent_id():
     assert deleted == {'data': {'deleteSession': None},
                        'errors': [{'locations': [{'column': 13, 'line': 3}], 'message': 'SessionLog matching query does not exist.', 'path': ['deleteSession']}]
                        }
+
+@pytest.mark.django_db
+def test_create_session_log():
+    
+    testuserjane = User.objects.create(username="janesgains")
+    testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation  {  
+            createSessionExercise(exerciseId: "27", sessionId: "11") {
+                sessionExercise {
+                    sessionExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+
+    assert executed == {'data': {'createSessionExercise': {'sessionExercise': {'sessionExerciseId': '2'}}}}
+
+@pytest.mark.django_db
+def test_create_session_log_fail_nonexistent_ids():
+    
+    testuserjane = User.objects.create(username="janesgains")
+    testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    nonexistentexercise = '''
+        mutation  {  
+            createSessionExercise(exerciseId: "27000", sessionId: "12") {
+                sessionExercise {
+                    sessionExerciseId
+                }
+            }
+        }
+    '''
+    nonexistentsession = '''
+        mutation  {  
+            createSessionExercise(exerciseId: "28", sessionId: "1200000") {
+                sessionExercise {
+                    sessionExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(nonexistentexercise)
+
+    assert executed == {'data': {'createSessionExercise': None},
+                        'errors': [{'message': 'Exercise matching query does not exist.', 'locations': [{'line': 3, 'column': 13}], 'path': ['createSessionExercise']}]}
+
+    executed2 = client.execute(nonexistentsession)
+
+    assert executed2 == {'data': {'createSessionExercise': None},
+                         'errors': [{'message': 'SessionLog matching query does not exist.', 'locations': [{'line': 3, 'column': 13}], 'path': ['createSessionExercise']}]}
+    
+@pytest.mark.django_db
+def test_delete_session_exercise():
+
+    testuserjane = User.objects.create(username="janesgains")
+    testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    creation = '''
+        mutation  {  
+            createSessionExercise(exerciseId: "29", sessionId: "13") {
+                sessionExercise {
+                    sessionExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    created = client.execute(creation)
+
+    assert created == {'data': {'createSessionExercise': {'sessionExercise': {'sessionExerciseId': '3'}}}}
+
+    mutation = '''
+        mutation  {  
+              deleteSessionExercise(sessionExerciseId: "3") {
+                sessionExercise {
+                    sessionExerciseId
+                    }
+                }
+            }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+
+    assert executed == {'data': {'deleteSessionExercise': None}}
+
+@pytest.mark.django_db
+def test_delete_session_exercise_fail_nonexistent_id():
+
+    testuserjane = User.objects.create(username="janesgains")
+    testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    creation = '''
+        mutation  {  
+            createSessionExercise(exerciseId: "30", sessionId: "14") {
+                sessionExercise {
+                    sessionExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    created = client.execute(creation)
+
+    assert created == {'data': {'createSessionExercise': {'sessionExercise': {'sessionExerciseId': '4'}}}}
+
+    mutation = '''
+        mutation  {  
+              deleteSessionExercise(sessionExerciseId: "30000") {
+                sessionExercise {
+                    sessionExerciseId
+                    }
+                }
+            }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+
+    assert executed == {'data': {'deleteSessionExercise': None},
+                        'errors': [{'locations': [{'column': 15, 'line': 3}],
+                                    'message': 'SessionLog_Exercise matching query does not exist.',
+                                    'path': ['deleteSessionExercise']}]
+                        }

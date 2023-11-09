@@ -1043,3 +1043,174 @@ def test_get_workouts_by_nonexistent_exercise_id():
             'getWorkoutsByExerciseId': []
                 },
     }
+
+@pytest.mark.django_db
+def test_create_user():
+
+    mutation = '''
+        mutation  {
+            createUser(username: "test") {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(mutation)
+  
+    assert executed == {
+        'data': {
+            'createUser': {
+                'user': {
+                    'userId': '19',
+                    'username': 'test'
+                }
+                
+            }
+        }
+    }
+
+@pytest.mark.django_db
+def test_create_invalid_user():
+
+    mutation = '''
+        mutation  {
+            createUser(username: test) {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(mutation)
+  
+    assert executed == {
+        'data': None,
+        'errors': [{'locations': [{
+                        'column': 34,
+                        'line':3
+                        }],
+                    'message': 'String cannot represent a non string value: test'
+                    }]
+        }
+
+@pytest.mark.django_db
+def test_update_user_username():
+
+    testuserjane = User.objects.create(username="janesgains")
+
+    mutation = '''
+        mutation  {
+            updateUser(userId: "20", username: "testupdate") {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(mutation)
+  
+    assert executed == {
+        'data': {
+            'updateUser': {
+                'user': {
+                    'userId': '20',
+                    'username': 'testupdate'
+                }
+                
+            }
+        }
+    }
+
+@pytest.mark.django_db
+def test_update_nonexistent_user_username():
+
+    mutation = '''
+        mutation  {
+            updateUser(userId: "200000", username: "testupdate") {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executed = client.execute(mutation)
+  
+    assert executed == {
+        'data': {'updateUser': None},
+        'errors': [{'locations': [{'column': 13,
+                                   'line': 3
+                                    }],
+                    'message': 'User matching query does not exist.',
+                    'path': ['updateUser'],
+                    }]
+        }
+    
+    invalidmutation = '''
+        mutation  {
+            updateUser(userId: "200000", username: testupdate) {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+    
+    client = Client(schema)
+    executedinvalid = client.execute(invalidmutation)
+  
+    assert executedinvalid == {
+        'data': None,
+        'errors': [{'locations': [{'column': 52,
+                                   'line': 3
+                                    }],
+                    'message': 'String cannot represent a non string value: ' 'testupdate',
+                    }]
+        }
+
+@pytest.mark.django_db
+def test_delete_user_username():
+
+    testuserjane = User.objects.create(username="janesgains")
+
+    mutation = '''
+        mutation  {  
+            deleteUser(userId: "21") {
+                user {
+                    userId
+                    username
+                }
+            }
+        }
+    '''
+    
+    query = '''
+        query {
+            getAllUsers {
+                userId
+                username
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+    client.execute(mutation)
+    deleted = client.execute(query)
+  
+    assert executed == {'data': {'getAllUsers': [{'userId': '21', 'username': 'janesgains'}]}}
+    assert deleted == {'data': {'getAllUsers': []}}
+

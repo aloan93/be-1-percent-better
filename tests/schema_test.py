@@ -1535,3 +1535,287 @@ def test_delete_exercise_nonexistent_id():
                                     'path': ['deleteExercise']
                                     }]
                         }
+    
+
+@pytest.mark.django_db
+def test_create_workout():
+
+    testuserjane = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation  {
+            createWorkout(exerciseId: "20", reps: 10, sets: 12, weightKg: 15) {
+                workout {
+                reps
+                sets
+                weightKg
+                workoutId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': {
+                           'createWorkout': {
+                                'workout': {
+                                    'reps': 10,
+                                    'sets': 12,
+                                    'weightKg': 15,
+                                    'workoutId': '5'
+                                    }
+                                }
+                            }
+    } 
+
+@pytest.mark.django_db
+def test_create_workout_fail_missing_id():
+
+    testuserjane = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation  {
+            createWorkout(reps: 10, sets: 12, weightKg: 15) {
+                workout {
+                reps
+                sets
+                weightKg
+                workoutId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': None,
+                        'errors': [{'locations': [{'column': 13, 'line': 3}],
+                        'message': "Field 'createWorkout' argument 'exerciseId' of type "
+                                     "'ID!' is required, but it was not provided."}],       
+    } 
+
+@pytest.mark.django_db
+def test_create_workout_fail_missing_fields():
+
+    testuserjane = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    missingsets = '''
+        mutation  {
+            createWorkout(exerciseId: "21", reps: 12, weightKg: 15) {
+                workout {
+                reps
+                sets
+                weightKg
+                workoutId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executednosets = client.execute(missingsets)
+
+    assert executednosets == {'data': None,
+                              'errors': [{'locations': [{'column': 13, 
+                                                         'line': 3}],
+                                          'message': "Field 'createWorkout' argument 'sets' of type 'Int!' "
+                                                     'is required, but it was not provided.'}],     
+                            }
+
+    missingreps = '''
+        mutation  {
+            createWorkout(exerciseId: "21", sets: 12, weightKg: 15) {
+                workout {
+                reps
+                sets
+                weightKg
+                workoutId
+                }
+            }
+        }
+    '''
+    executednoreps = client.execute(missingreps)
+
+    assert executednoreps == {'data': None,
+                              'errors': [{'locations': [{'column': 13, 
+                                                         'line': 3}],
+                                          'message': "Field 'createWorkout' argument 'reps' of type 'Int!' "
+                                                     'is required, but it was not provided.'}],                         
+                            }
+
+    missingweight = '''
+        mutation  {
+            createWorkout(exerciseId: "21", sets: 12, reps: 15) {
+                workout {
+                reps
+                sets
+                weightKg
+                workoutId
+                }
+            }
+        }
+    '''
+    executednoweight = client.execute(missingweight)
+
+    assert executednoweight == {'data': None,
+                              'errors': [{'locations': [{'column': 13, 
+                                                         'line': 3}],
+                                          'message': "Field 'createWorkout' argument 'weightKg' of type 'Int!' "
+                                                     'is required, but it was not provided.'}],                         
+                            }
+   
+@pytest.mark.django_db
+def test_update_workout():
+
+    testuser = User.objects.create(username="tester")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+    testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
+
+    mutation = '''
+        mutation {
+            updateWorkout(workoutId: "6", reps: 20, sets: 20, weightKg: 20) {
+                workout {
+                    workoutId
+                    reps
+                    sets
+                    weightKg
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': {'updateWorkout': {
+                                    'workout': {
+                                        'workoutId':str(testworkout.workout_id),
+                                        'sets': 20,
+                                        'weightKg': 20,
+                                        'reps': 20
+                                        }}
+                                    }  
+    }
+
+@pytest.mark.django_db
+def test_update_workout_fail_no_sets():
+
+    testuser = User.objects.create(username="tester")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+    testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
+
+    mutation = '''
+        mutation {
+            updateWorkout(workoutId: "7", reps: 20, weightKg: 20) {
+                workout {
+                    workoutId
+                    reps
+                    sets
+                    weightKg
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': None,
+                         'errors': [{'locations': [{'column': 13, 'line': 3}],
+                         'message': "Field 'updateWorkout' argument 'sets' of type 'Int!' "
+                                 'is required, but it was not provided.'}]
+                        }
+
+
+@pytest.mark.django_db
+def test_update_workout_fail_nonexistent_id():
+
+    mutation = '''
+        mutation {
+            updateWorkout(workoutId: "71", reps: 20, weightKg: 20, sets: 100) {
+                workout {
+                    workoutId
+                    reps
+                    sets
+                    weightKg
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': {'updateWorkout': None},
+                          'errors': [{'locations': [{'column': 13, 'line': 3}], 
+                                      'message': 'WorkoutLog matching query does not exist.', 
+                                      'path': ['updateWorkout']}]}
+
+
+@pytest.mark.django_db
+def test_delete_workout():
+
+    testuser = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+    testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
+    query = '''
+        query {
+            getAllWorkouts {
+                workoutId
+            }
+        }
+    '''
+
+    mutation = '''
+        mutation  {  
+            deleteWorkout(workoutId: "8") {
+                workout {
+                    workoutId
+                    }
+                }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+
+    assert executed == {'data': {'getAllWorkouts': [{'workoutId': str(testworkout.workout_id)}]}}
+
+    client.execute(mutation)
+    deleted = client.execute(query)
+  
+    assert deleted == {'data': {'getAllWorkouts': []}}
+
+@pytest.mark.django_db
+def test_delete_workout_nonexistent_id():
+
+    testuser = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+    testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
+
+    mutation = '''
+        mutation  {  
+            deleteWorkout(workoutId: "180000") {
+                workout {
+                    workoutId
+                    }
+                }
+        }
+    '''
+
+    client = Client(schema)
+   
+    client.execute(mutation)
+    deleted = client.execute(mutation)
+  
+    assert deleted == {'data': {'deleteWorkout': None},
+                       'errors': [{'locations': [{'column': 13, 'line': 3}],
+                                   'message': 'WorkoutLog matching query does not exist.',
+                                   'path': ['deleteWorkout']}]
+                       }

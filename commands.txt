@@ -24,3 +24,6 @@ pip3 install mysqlclient
 
 # If you make edits to the requirements, update the requirements.txt file, with either pip or pip3:
 pip3 freeze > requirements.txt
+
+# To run the tests:
+pytest

@@ -5,11 +5,10 @@ import pytest
 
 @pytest.mark.django_db
 def test_get_all_users():
-    # Create test users in the database
+  
     user1 = User.objects.create(username='user1')
     user2 = User.objects.create(username='user2')
-    
-    # Make the GraphQL query
+   
     query = '''
         query {
             getAllUsers {
@@ -19,12 +18,9 @@ def test_get_all_users():
         }
     '''
     
-    # Initialise this client with the schema 
     client = Client(schema)
-    # execute() method of the client is then called with the query, which sends the query to the GraphQL API.
     executed = client.execute(query)
     
-    # Check the response is correct 
     assert executed == {
         'data': {
             'getAllUsers': [
@@ -1214,3 +1210,155 @@ def test_delete_user_username():
     assert executed == {'data': {'getAllUsers': [{'userId': '21', 'username': 'janesgains'}]}}
     assert deleted == {'data': {'getAllUsers': []}}
 
+
+@pytest.mark.django_db
+def test_create_exercise():
+
+    testuserjane = User.objects.create(username="janesgains")
+
+    mutation = '''
+        mutation  {
+            createExercise(
+                externalExerciseBodypart: "waist"
+                externalExerciseId: "2000"
+                externalExerciseName: "chest press"
+                userId: "22"
+            ) {
+            exercise {
+                exerciseId
+                externalExerciseBodypart
+                externalExerciseId
+                externalExerciseName
+                personalBest
+                userId {
+                    userId
+                    username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    data = executed['data']
+
+    assert data['createExercise'] == {'exercise': 
+                                      {'exerciseId': '13', 
+                                       'externalExerciseBodypart': 'waist',
+                                        'externalExerciseId': '2000', 
+                                        'externalExerciseName': 'chest press',
+                                        'personalBest': 0,
+                                         'userId':{
+                                             'userId':'22',
+                                             'username': 'janesgains'
+                                            }
+                                        }
+                                    }
+
+
+@pytest.mark.django_db
+def test_create_exercise_no_user():
+
+    mutation = '''
+        mutation  {
+            createExercise(
+                externalExerciseBodypart: "waist"
+                externalExerciseId: "2000"
+                externalExerciseName: "chest press"
+            ) {
+            exercise {
+                exerciseId
+                externalExerciseBodypart
+                userId {
+                    userId
+                    username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': None,
+                        'errors': [{
+                            'locations': [{
+                                'column': 13,
+                                'line': 3
+                                }],
+                            'message': "Field 'createExercise' argument 'userId' of type " 
+                                        "'ID!' is required, but it was not provided."
+                        }]}
+
+@pytest.mark.django_db
+def test_create_exercise_nonexistent_user():
+
+    testuserjane = User.objects.create(username="janesgains")
+
+    mutation = '''
+        mutation  {
+            createExercise(
+                externalExerciseBodypart: "waist"
+                externalExerciseId: "2000"
+                externalExerciseName: "chest press"
+                userId: "499999"
+            ) {
+            exercise {
+                exerciseId
+                externalExerciseBodypart
+                userId {
+                    userId
+                    username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+
+    assert executed == {'data': {'createExercise': None},
+                        'errors': [{
+                            'locations': [{
+                                'column': 13,
+                                'line': 3
+                                }],
+                            'message': 'User matching query does not exist.',
+                            'path': ['createExercise']
+                        }]}
+    
+@pytest.mark.django_db
+def test_update_exercise():
+
+    testuser = User.objects.create(username="tester")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation {
+            updateExercise(exerciseId: "14", personalBest: 50) {
+                exercise {
+                exerciseId
+                personalBest
+                externalExerciseName
+                externalExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': {'updateExercise': {
+                                    'exercise': {
+                                        'exerciseId':str(testexercise.exercise_id),
+                                        'externalExerciseId': str(testexercise.external_exercise_id),
+                                        'externalExerciseName': testexercise.external_exercise_name,
+                                        'personalBest': 50
+                                        }}
+                                    }  
+    }

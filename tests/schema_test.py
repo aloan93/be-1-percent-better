@@ -729,8 +729,9 @@ def test_get_all_workouts_is_empty():
 def test_get_all_workouts():
 
     testuserjames = User.objects.create(username='jamesgains')
+    me = User.objects.get(username="jamesgains")
 
-    workoutexercise = Exercise.objects.create(user_id=testuserjames, external_exercise_id='1304', external_exercise_name='Glute Bridge Test', external_exercise_bodypart='Upper Legs', personal_best=20)
+    workoutexercise = Exercise.objects.create(user_id=me, external_exercise_id='1304', external_exercise_name='Glute Bridge Test', external_exercise_bodypart='Upper Legs', personal_best=20)
     testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 12, sets=3, weight_kg=20)
 
     query = '''
@@ -762,8 +763,8 @@ def test_get_all_workouts():
                 'exerciseId': {'exerciseId': str(workoutexercise.exercise_id),
                                'externalExerciseName': workoutexercise.external_exercise_name,
                                'userId': {
-                                   'userId': str(testuserjames.user_id),
-                                   'username': testuserjames.username
+                                   'userId': str(me.user_id),
+                                   'username': me.username
                                }
                                },
                 'reps': testworkout.reps,
@@ -771,5 +772,274 @@ def test_get_all_workouts():
                 'weightKg': testworkout.weight_kg,
                 'workoutId': str(testworkout.workout_id)
                 }]
+                },
+    }
+
+@pytest.mark.django_db
+def test_get_workout_by_workout_id():
+
+    testuserjane = User.objects.create(username="janesgains")
+
+    workoutexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='1304', external_exercise_name='Glute Band Test', external_exercise_bodypart='Upper Legs', personal_best=10)
+    testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 10, sets=3, weight_kg=10)
+
+    query = '''
+        query {
+            getWorkoutByWorkoutId(workoutId: 3) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getWorkoutByWorkoutId': {
+                'exerciseId': {'exerciseId': str(workoutexercise.exercise_id),
+                               'externalExerciseName': workoutexercise.external_exercise_name,
+                               'userId': {
+                                   'userId': str(testuserjane.user_id),
+                                   'username': testuserjane.username
+                               }
+                               },
+                'reps': testworkout.reps,
+                'sets': testworkout.sets,
+                'weightKg': testworkout.weight_kg,
+                'workoutId': str(testworkout.workout_id)
+                }
+                },
+    }
+
+@pytest.mark.django_db
+def test_get_workout_by_nonexisting_workout_id():
+
+    query = '''
+        query {
+            getWorkoutByWorkoutId(workoutId: 3000000) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getWorkoutByWorkoutId': None
+                },
+        'errors': [{
+            'locations': [{
+                'column': 13,
+                'line': 3
+            }],
+            'message': 'WorkoutLog matching query does not exist.',
+            'path': ['getWorkoutByWorkoutId'] 
+        }]
+    }
+
+@pytest.mark.django_db
+def test_get_workout_by_invalid_workout_id():
+
+    query = '''
+        query {
+            getWorkoutByWorkoutId(workoutId: bananas) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': None,
+        'errors': [{
+            'locations': [{
+                'column': 46,
+                'line': 3
+            }],
+            'message': 'Int cannot represent non-integer value: bananas',
+        }]
+    }
+
+@pytest.mark.django_db
+def test_get_workouts_by_exercise_id_empty():
+
+    query = '''
+        query {
+            getWorkoutsByExerciseId(exerciseId: 11) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getWorkoutsByExerciseId': []
+                },
+    }
+
+@pytest.mark.django_db
+def test_get_workouts_by_exercise_id():
+
+    testuserjane = User.objects.create(username="janesgains")
+
+    workoutexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='1304', external_exercise_name='Glute Band Test', external_exercise_bodypart='Upper Legs', personal_best=10)
+    testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 10, sets=3, weight_kg=10)
+
+    query = '''
+        query {
+            getWorkoutsByExerciseId(exerciseId: 12) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getWorkoutsByExerciseId': [{
+                'exerciseId': {'exerciseId': str(workoutexercise.exercise_id),
+                               'externalExerciseName': workoutexercise.external_exercise_name,
+                               'userId': {
+                                   'userId': str(testuserjane.user_id),
+                                   'username': testuserjane.username
+                               }
+                               },
+                'reps': testworkout.reps,
+                'sets': testworkout.sets,
+                'weightKg': testworkout.weight_kg,
+                'workoutId': str(testworkout.workout_id)
+                }]
+                },
+    }
+
+@pytest.mark.django_db
+def test_get_workouts_by_invalid_exercise_id():
+
+    query = '''
+        query {
+            getWorkoutsByExerciseId(exerciseId: bananas) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': None,
+        'errors': [{
+            'locations': [{
+                'column': 49,
+                'line': 3
+            }],
+            'message': 'Int cannot represent non-integer value: bananas',
+        }]
+    }
+
+@pytest.mark.django_db
+def test_get_workouts_by_nonexisting_exercise_id():
+
+    query = '''
+        query {
+            getWorkoutsByExerciseId(exerciseId: 3000000) {
+                reps
+                sets
+                weightKg
+                workoutId
+                exerciseId {
+                    exerciseId
+                    externalExerciseName
+                    userId {
+                        userId
+                        username
+                    }
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+  
+    assert executed == {
+        'data': {
+            'getWorkoutsByExerciseId': []
                 },
     }

@@ -137,7 +137,7 @@ def test_get_users_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_users_by_nonexisting_user_id():
+def test_get_users_by_nonexistent_user_id():
     
    
     query = '''
@@ -230,7 +230,7 @@ def test_get_exercise_by_exercise_id():
     }
 
 @pytest.mark.django_db
-def test_get_exercise_by_nonexisting_exercise_id():
+def test_get_exercise_by_nonexistent_exercise_id():
 
     query = '''
        query {
@@ -423,7 +423,7 @@ def test_get_exercises_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_exercises_by_nonexisting_user_id():  
+def test_get_exercises_by_nonexistent_user_id():  
    
     query = '''
        query {
@@ -564,7 +564,7 @@ def test_get_sessions_by_user_id():
     }
 
 @pytest.mark.django_db
-def test_get_sessions_by_nonexisting_user_id():
+def test_get_sessions_by_nonexistent_user_id():
 
     query = '''
         query {
@@ -642,7 +642,7 @@ def test_get_session_by_session_id():
     }
 
 @pytest.mark.django_db
-def test_get_session_by_nonexisting_session_id():
+def test_get_session_by_nonexistent_session_id():
 
     query = '''
         query {
@@ -824,7 +824,7 @@ def test_get_workout_by_workout_id():
     }
 
 @pytest.mark.django_db
-def test_get_workout_by_nonexisting_workout_id():
+def test_get_workout_by_nonexistent_workout_id():
 
     query = '''
         query {
@@ -1014,7 +1014,7 @@ def test_get_workouts_by_invalid_exercise_id():
     }
 
 @pytest.mark.django_db
-def test_get_workouts_by_nonexisting_exercise_id():
+def test_get_workouts_by_nonexistent_exercise_id():
 
     query = '''
         query {

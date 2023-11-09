@@ -1362,3 +1362,176 @@ def test_update_exercise():
                                         }}
                                     }  
     }
+
+@pytest.mark.django_db
+def test_update_exercise_nonexistent_exercise_id():
+
+    testuser = User.objects.create(username="tester")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation {
+            updateExercise(exerciseId: "1200", personalBest: 50) {
+                exercise {
+                exerciseId
+                personalBest
+                externalExerciseName
+                externalExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': {'updateExercise': None },  
+                        'errors': [{'locations': [{'column': 13,
+                                                   'line': 3
+                                                   }],
+                                    'message': 'Exercise matching query does not exist.',
+                                    'path': ['updateExercise']
+                                    }]
+    }
+
+
+@pytest.mark.django_db
+def test_update_exercise_without_pb():
+
+    testuser = User.objects.create(username="tester")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation {
+            updateExercise(exerciseId: "1200") {
+                exercise {
+                exerciseId
+                personalBest
+                externalExerciseName
+                externalExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': None,  
+                        'errors': [{'locations': [{'column': 13,
+                                                   'line': 3
+                                                   }],
+                                    'message': "Field 'updateExercise' argument 'personalBest' of " 
+                                                "type 'Int!' is required, but it was not provided."
+                                    }]
+    }
+
+@pytest.mark.django_db
+def test_update_exercise_invalid_pb():
+
+    testuser = User.objects.create(username="tester")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    mutation = '''
+        mutation {
+            updateExercise(exerciseId: "1200", personalBest: "90") {
+                exercise {
+                exerciseId
+                personalBest
+                externalExerciseName
+                externalExerciseId
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+    
+    assert executed == {'data': None,  
+                        'errors': [{'locations': [{'column': 62,
+                                                   'line': 3
+                                                   }],
+                                    'message': 'Int cannot represent non-integer value: "90"'
+                                    }]
+    }
+
+@pytest.mark.django_db
+def test_delete_exercise():
+
+    testuser = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    query = '''
+        query {
+            getAllExercises {
+                userId {
+                    username
+                }
+                exerciseId
+            }
+        }
+    '''
+
+    mutation = '''
+        mutation  {  
+            deleteExercise(exerciseId: "18") {
+                exercise {
+                    exerciseId
+                    }
+                }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+
+    assert executed == {'data': {'getAllExercises': [{'exerciseId': str(testexercise.exercise_id), 'userId': {'username': 'janesgains'}}]}}
+
+    client.execute(mutation)
+    deleted = client.execute(query)
+  
+    assert deleted == {'data': {'getAllExercises': []}}
+
+@pytest.mark.django_db
+def test_delete_exercise_nonexistent_id():
+
+    testuser = User.objects.create(username="janesgains")
+    testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
+
+    query = '''
+        query {
+            getAllExercises {
+                userId {
+                    username
+                }
+                exerciseId
+            }
+        }
+    '''
+
+    mutation = '''
+        mutation  {  
+            deleteExercise(exerciseId: "180") {
+                exercise {
+                    exerciseId
+                    }
+                }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(query)
+
+    assert executed == {'data': {'getAllExercises': [{'exerciseId': str(testexercise.exercise_id), 'userId': {'username': 'janesgains'}}]}}
+
+    client.execute(mutation)
+    deleted = client.execute(mutation)
+  
+    assert deleted == {'data': {'deleteExercise': None},
+                       'errors': [{'locations': [{'column': 13,
+                                                  'line': 3}],
+                                    'message': 'Exercise matching query does not exist.',
+                                    'path': ['deleteExercise']
+                                    }]
+                        }

@@ -1,11 +1,13 @@
 import graphene
+import graphql_jwt
 from graphene_django import DjangoObjectType 
-from .models import User, Exercise, WorkoutLog, SessionLog, SessionLog_Exercise
+from graphql_jwt.decorators import login_required
+from .models import ExtendUser, Exercise, WorkoutLog, SessionLog, SessionLog_Exercise
 
 class UserType(DjangoObjectType):
     class Meta:
-        model = User
-        fields = '__all__'
+        model = ExtendUser
+        exclude = ('password',)
 
 class ExerciseType(DjangoObjectType):
     class Meta:
@@ -32,6 +34,7 @@ class Query(graphene.ObjectType):
 
     get_all_users = graphene.List(UserType)
     get_user_by_user_id = graphene.Field(UserType, user_id=graphene.Int())
+    logged_in = graphene.Field(UserType)
     
     get_all_exercises = graphene.List(ExerciseType)
     get_exercises_by_user_id = graphene.List(ExerciseType, user_id=graphene.Int())
@@ -48,11 +51,15 @@ class Query(graphene.ObjectType):
     get_exercises_by_session_id = graphene.List(SessionLog_ExerciseType, session_id=graphene.Int())
 
     def resolve_get_all_users(self, info):
-        return User.objects.all()
+        return ExtendUser.objects.all()
     
     def resolve_get_user_by_user_id(self, info, user_id):
-        return User.objects.get(pk=user_id)
+        return ExtendUser.objects.get(pk=user_id)
     
+    @login_required
+    def resolve_logged_in(self, info):
+        return info.context.user
+
     def resolve_get_all_exercises(self, info):
         return Exercise.objects.all()
     
@@ -88,12 +95,15 @@ class UserMutationCreate(graphene.Mutation):
 
     class Arguments:
         username= graphene.String(required=True)
+        email = graphene.String(required=True)
+        password = graphene.String(required=True)
 
     user = graphene.Field(UserType)
 
     @classmethod
-    def mutate(cls, root, info, username):
-        user = User(username=username)
+    def mutate(cls, root, info, username, email, password):
+        user = ExtendUser(username=username, email=email)
+        user.set_password(password)
         user.save()
         return UserMutationCreate(user = user)
 
@@ -107,7 +117,7 @@ class UserMutationUpdate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id, username):
-        user = User.objects.get(user_id = user_id)
+        user = ExtendUser.objects.get(user_id = user_id)
         user.username = username
         user.save()
         return UserMutationUpdate(user = user)
@@ -121,7 +131,7 @@ class UserMutationDelete(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id):
-        user = User.objects.get(user_id = user_id)
+        user = ExtendUser.objects.get(user_id = user_id)
         user.delete()
         return
 
@@ -137,7 +147,7 @@ class ExerciseMutationCreate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id, external_exercise_id, external_exercise_name, external_exercise_bodypart):
-        user_obj = User.objects.get(user_id=user_id)
+        user_obj = ExtendUser.objects.get(user_id=user_id)
         exercise = Exercise(user_id=user_obj, external_exercise_id=external_exercise_id, external_exercise_name=external_exercise_name, external_exercise_bodypart=external_exercise_bodypart)
         exercise.save()
         return ExerciseMutationCreate(exercise=exercise)
@@ -229,7 +239,7 @@ class SessionMutationCreate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id, session_name):
-        user_obj = User.objects.get(user_id=user_id)
+        user_obj = ExtendUser.objects.get(user_id=user_id)
         session = SessionLog(user_id=user_obj, session_name=session_name)
         session.save()
         return SessionMutationCreate(session=session)
@@ -312,6 +322,10 @@ class Mutation(graphene.ObjectType):
 
     create_session_exercise = SessionExerciseMutationCreate.Field()
     delete_session_exercise = SessionExerciseMutationDelete.Field()
+
+    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

@@ -1,6 +1,5 @@
 Venv/
 venv/
-myworld/
 .env*
-__pycache__
+__pycache__/
 

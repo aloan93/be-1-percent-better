@@ -1,15 +1,19 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class User(models.Model):
+class ExtendUser(AbstractUser):
     user_id = models.AutoField(primary_key=True)
-    username = models.CharField(unique=True, max_length=20, null=False)
+    email = models.EmailField(blank=False, max_length=255, verbose_name='email')
+
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = 'email'
 
     def __str__(self):
         return self.username
 
 class Exercise(models.Model):
     exercise_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    user_id = models.ForeignKey(ExtendUser, on_delete=models.CASCADE, null=False)
     external_exercise_id = models.CharField(max_length=4, null=False)
     external_exercise_name = models.CharField(max_length=100, null=False)
     external_exercise_bodypart = models.CharField(max_length=20, null=False)
@@ -31,7 +35,7 @@ class WorkoutLog(models.Model):
     
 class SessionLog(models.Model):
     session_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    user_id = models.ForeignKey(ExtendUser, on_delete=models.CASCADE, null=False)
     date_time = models.DateTimeField(auto_now_add=True)
     session_name = models.CharField(max_length=30, null=False)
 

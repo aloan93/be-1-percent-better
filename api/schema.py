@@ -1,10 +1,10 @@
 import graphene
 from graphene_django import DjangoObjectType 
-from .models import User, Exercise, WorkoutLog, SessionLog, SessionLog_Exercise
+from .models import ExtendUser, Exercise, WorkoutLog, SessionLog, SessionLog_Exercise
 
 class UserType(DjangoObjectType):
     class Meta:
-        model = User
+        model = ExtendUser
         fields = '__all__'
 
 class ExerciseType(DjangoObjectType):
@@ -48,10 +48,10 @@ class Query(graphene.ObjectType):
     get_exercises_by_session_id = graphene.List(SessionLog_ExerciseType, session_id=graphene.Int())
 
     def resolve_get_all_users(self, info):
-        return User.objects.all()
+        return ExtendUser.objects.all()
     
     def resolve_get_user_by_user_id(self, info, user_id):
-        return User.objects.get(pk=user_id)
+        return ExtendUser.objects.get(pk=user_id)
     
     def resolve_get_all_exercises(self, info):
         return Exercise.objects.all()
@@ -93,7 +93,7 @@ class UserMutationCreate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, username):
-        user = User(username=username)
+        user = ExtendUser(username=username)
         user.save()
         return UserMutationCreate(user = user)
 
@@ -107,7 +107,7 @@ class UserMutationUpdate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id, username):
-        user = User.objects.get(user_id = user_id)
+        user = ExtendUser.objects.get(user_id = user_id)
         user.username = username
         user.save()
         return UserMutationUpdate(user = user)
@@ -121,7 +121,7 @@ class UserMutationDelete(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id):
-        user = User.objects.get(user_id = user_id)
+        user = ExtendUser.objects.get(user_id = user_id)
         user.delete()
         return
 
@@ -137,7 +137,7 @@ class ExerciseMutationCreate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id, external_exercise_id, external_exercise_name, external_exercise_bodypart):
-        user_obj = User.objects.get(user_id=user_id)
+        user_obj = ExtendUser.objects.get(user_id=user_id)
         exercise = Exercise(user_id=user_obj, external_exercise_id=external_exercise_id, external_exercise_name=external_exercise_name, external_exercise_bodypart=external_exercise_bodypart)
         exercise.save()
         return ExerciseMutationCreate(exercise=exercise)
@@ -229,7 +229,7 @@ class SessionMutationCreate(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, user_id, session_name):
-        user_obj = User.objects.get(user_id=user_id)
+        user_obj = ExtendUser.objects.get(user_id=user_id)
         session = SessionLog(user_id=user_obj, session_name=session_name)
         session.save()
         return SessionMutationCreate(session=session)

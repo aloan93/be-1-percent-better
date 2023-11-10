@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 class ExtendUser(AbstractUser):
     user_id = models.AutoField(primary_key=True)
@@ -13,7 +14,7 @@ class ExtendUser(AbstractUser):
 
 class Exercise(models.Model):
     exercise_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(ExtendUser, on_delete=models.CASCADE, null=False)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
     external_exercise_id = models.CharField(max_length=4, null=False)
     external_exercise_name = models.CharField(max_length=100, null=False)
     external_exercise_bodypart = models.CharField(max_length=20, null=False)
@@ -35,7 +36,7 @@ class WorkoutLog(models.Model):
     
 class SessionLog(models.Model):
     session_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(ExtendUser, on_delete=models.CASCADE, null=False)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
     date_time = models.DateTimeField(auto_now_add=True)
     session_name = models.CharField(max_length=30, null=False)
 

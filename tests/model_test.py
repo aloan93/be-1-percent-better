@@ -1,12 +1,12 @@
 import pytest
-from api.models import User, Exercise, SessionLog, WorkoutLog, SessionLog_Exercise
+from api.models import ExtendUser, Exercise, SessionLog, WorkoutLog, SessionLog_Exercise
 
 @pytest.mark.django_db
 def test_user_model():
     # Creates a new user in the database
-    user = User.objects.create(username='testuser')
+    user = ExtendUser.objects.create(username='testuser')
     # Fetch the User instance from the database
-    queried_user = User.objects.get(username='testuser')
+    queried_user = ExtendUser.objects.get(username='testuser')
     # Assertions check the username matches the expected value
     assert user.username == 'testuser', "Username does not match the expected value."
     assert queried_user.username == 'testuser', "Username does not match the expected value."
@@ -14,7 +14,7 @@ def test_user_model():
 @pytest.mark.django_db
 def test_create_exercise():
     # Create user
-    user = User.objects.create(username='testuser')
+    user = ExtendUser.objects.create(username='testuser')
     # Create Exercise
     exercise = Exercise.objects.create(user_id=user, external_exercise_id='1234', external_exercise_name='Squat', external_exercise_bodypart='Legs', personal_best=0)
     # Check how many exercise instances are in the database / Error message 
@@ -26,7 +26,7 @@ def test_create_exercise():
 
 @pytest.mark.django_db
 def test_create_workout_log():
-    user = User.objects.create(username='testuser')
+    user =  ExtendUser.objects.create(username='testuser', password='password', email='testuser@test.com')
     exercise = Exercise.objects.create(user_id=user, external_exercise_id='1234', external_exercise_name='Squat', external_exercise_bodypart='Legs', personal_best=0)
     workout_log = WorkoutLog.objects.create(exercise_id=exercise, reps=10, weight_kg=20, sets=3)
     assert WorkoutLog.objects.count() == 1, "Number of workout logs in the database does not match the expected value."
@@ -35,7 +35,7 @@ def test_create_workout_log():
 
 @pytest.mark.django_db
 def test_create_session_log():
-    user = User.objects.create(username='testuser')
+    user = ExtendUser.objects.create(username='testuser', password='password', email='testuser@test.com')
     session_log = SessionLog.objects.create(user_id=user, session_name='Test Session')
     assert SessionLog.objects.count() == 1, "Number of session logs in the database does not match the expected value."
     assert session_log.session_name == 'Test Session', "Session log's name does not match the expected value."
@@ -43,7 +43,7 @@ def test_create_session_log():
 
 @pytest.mark.django_db
 def test_create_session_log_exercise():
-    user = User.objects.create(username='testuser')
+    user = ExtendUser.objects.create(username='testuser', password='password', email='testuser@test.com')
     exercise = Exercise.objects.create(user_id=user, external_exercise_id='1234', external_exercise_name='Squat', external_exercise_bodypart='Legs', personal_best=0)
     session_log = SessionLog.objects.create(user_id=user, session_name='Test Session')
     session_log_exercise = SessionLog_Exercise.objects.create(session_id=session_log, exercise_id=exercise)

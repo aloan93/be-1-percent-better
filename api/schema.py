@@ -89,8 +89,6 @@ class UserMutationCreate(graphene.Mutation):
 
     class Arguments:
         username= graphene.String(required=True)
-        email = graphene.String(required=True)
-        password = graphene.String(required=True)
 
     user = graphene.Field(UserType)
 
@@ -315,10 +313,5 @@ class Mutation(graphene.ObjectType):
 
     create_session_exercise = SessionExerciseMutationCreate.Field()
     delete_session_exercise = SessionExerciseMutationDelete.Field()
-
-    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
-    verify_token = graphql_jwt.Verify.Field()
-    refresh_token = graphql_jwt.Refresh.Field()
-
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

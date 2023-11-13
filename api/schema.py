@@ -7,7 +7,7 @@ from .models import ExtendUser, Exercise, WorkoutLog, SessionLog, SessionLog_Exe
 class UserType(DjangoObjectType):
     class Meta:
         model = ExtendUser
-        fields = '__all__'
+        exclude = ('password')
 
 class ExerciseType(DjangoObjectType):
     class Meta:
@@ -95,12 +95,15 @@ class UserMutationCreate(graphene.Mutation):
 
     class Arguments:
         username= graphene.String(required=True)
+        email = graphene.String(required=True)
+        password = graphene.String(required=True)
 
     user = graphene.Field(UserType)
 
     @classmethod
-    def mutate(cls, root, info, username):
-        user = ExtendUser(username=username)
+    def mutate(cls, root, info, username, email, password):
+        user = ExtendUser(username=username, email=email)
+        user.set_password(password)
         user.save()
         return UserMutationCreate(user = user)
 

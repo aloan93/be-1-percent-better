@@ -2,11 +2,17 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from be_1_percent_better.settings import base
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'be_1_percent_better.settings')
+
+    if base.DEBUG:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'be_1_percent_better.settings.local')
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'be_1_percent_better.settings.production')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

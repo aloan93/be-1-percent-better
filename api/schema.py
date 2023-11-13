@@ -7,7 +7,7 @@ from .models import ExtendUser, Exercise, WorkoutLog, SessionLog, SessionLog_Exe
 class UserType(DjangoObjectType):
     class Meta:
         model = ExtendUser
-        exclude = ('password')
+        exclude = ('password',)
 
 class ExerciseType(DjangoObjectType):
     class Meta:
@@ -57,7 +57,7 @@ class Query(graphene.ObjectType):
         return ExtendUser.objects.get(pk=user_id)
     
     @login_required
-    def resolved_logged_in(self, info):
+    def resolve_logged_in(self, info):
         return info.context.user
 
     def resolve_get_all_exercises(self, info):

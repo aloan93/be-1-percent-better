@@ -7,7 +7,7 @@ from .models import ExtendUser, Exercise, WorkoutLog, SessionLog, SessionLog_Exe
 class UserType(DjangoObjectType):
     class Meta:
         model = ExtendUser
-        exclude = ('password',)
+        fields = '__all__'
 
 class ExerciseType(DjangoObjectType):
     class Meta:
@@ -57,7 +57,7 @@ class Query(graphene.ObjectType):
         return ExtendUser.objects.get(pk=user_id)
     
     @login_required
-    def resolve_logged_in(self, info):
+    def resolved_logged_in(self, info):
         return info.context.user
 
     def resolve_get_all_exercises(self, info):
@@ -95,15 +95,12 @@ class UserMutationCreate(graphene.Mutation):
 
     class Arguments:
         username= graphene.String(required=True)
-        email = graphene.String(required=True)
-        password = graphene.String(required=True)
 
     user = graphene.Field(UserType)
 
     @classmethod
-    def mutate(cls, root, info, username, email, password):
-        user = ExtendUser(username=username, email=email)
-        user.set_password(password)
+    def mutate(cls, root, info, username):
+        user = ExtendUser(username=username)
         user.save()
         return UserMutationCreate(user = user)
 
@@ -326,6 +323,5 @@ class Mutation(graphene.ObjectType):
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     verify_token = graphql_jwt.Verify.Field()
     refresh_token = graphql_jwt.Refresh.Field()
-
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

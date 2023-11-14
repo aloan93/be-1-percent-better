@@ -139,7 +139,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 AUTH_USER_MODEL = 'api.ExtendUser'
 
@@ -152,4 +152,9 @@ GRAPHENE = {
 AUTHENTICATION_BACKENDS = [
     "graphql_jwt.backends.JSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000',
+    'https://one-percent-better-api-7up3.onrender.com',
 ]

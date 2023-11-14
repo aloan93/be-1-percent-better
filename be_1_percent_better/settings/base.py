@@ -158,3 +158,5 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'https://one-percent-better-api-7up3.onrender.com',
 ]
+
+CORS_ALLOW_CREDENTIALS = True

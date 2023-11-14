@@ -4,6 +4,8 @@ A GraphQL API that functions as the backend for the 1 Percent Better workout tra
 
 Hosted here --> https://one-percent-better-api-7up3.onrender.com/api
 
+If you would like to explore this repository and application on your local machine you can follow the steps outlined bellow.
+
 ## Getting Started
 
 Before cloning this repository you will need to have an adequate version of Python installed on your machine.

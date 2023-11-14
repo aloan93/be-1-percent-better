@@ -4,7 +4,7 @@ A GraphQL API that functions as the backend for the 1 Percent Better workout tra
 
 Hosted here --> https://one-percent-better-api-7up3.onrender.com/api
 
-If you would like to explore this repository and application on your local machine you can follow the steps outlined bellow.
+If you would like to explore this repository and application on your local machine you can follow the steps outlined below.
 
 ## Getting Started
 
@@ -26,7 +26,7 @@ cd be-1-percent-better
 
 ### Step 2: Setting up a Virtual Environment
 
-A virtual environment is recommended so that we have an independent space to install required dependancies. You can set one up with the following terminal command:
+A virtual environment is recommended so that we have an independent space to install required dependencies. You can set one up with the following terminal command:
 
 ```
 python3 -m venv <environment-name-here>
@@ -40,9 +40,9 @@ Once created and visible in the root directory you can activate your environment
 source <environment-name-here>/bin/activate
 ```
 
-### Step 3: Installing Dependancies
+### Step 3: Installing Dependencies
 
-To install the required dependancies for this project you can enter the following terminal command:
+To install the required dependencies for this project you can enter the following terminal command:
 
 ```
 pip3 install -r requirements.txt
@@ -63,11 +63,11 @@ SECRET_KEY=<django-secret-key>
 DEBUG=<boolean-value>
 ```
 
-Please note that the settings of this repository are pre-set to accommodate a MySQL database. If you wish to use a different db platform you will need to make relevent changes.
+Please note that the settings of this repository are pre-set to accommodate a MySQL database. If you wish to use a different db platform you will need to make relevant changes.
 
 ### Step 5: Making Migrations
 
-Before running the server you will need to make sure your database is set-up and populated with the relevant tables and collums. You can do this by using the following commands in your terminal:
+Before running the server you will need to make sure your database is set-up and populated with the relevant tables and columns. You can do this by using the following commands in your terminal:
 
 ```
 python3 manage.py makemigrations
@@ -82,6 +82,6 @@ You can now run the application on your local machine using the following termin
 python3 manage.py runserver
 ```
 
-Upon success your will be presented with a local host link (typically via port 8000) which you can navigate to by control clicking should it not open in your browser automatically.
+Upon success you will be presented with a local host link (typically via port 8000) which you can navigate to by control clicking should it not open in your browser automatically.
 
 ### And Done! Happy Exploring

@@ -1044,7 +1044,7 @@ def test_create_user():
 
     mutation = '''
         mutation  {
-            createUser(username: "test") {
+            createUser(username: "test", email: "test@test.com", password: "password") {
                 user {
                 userId
                 username
@@ -1073,7 +1073,7 @@ def test_create_invalid_user():
 
     mutation = '''
         mutation  {
-            createUser(username: test) {
+            createUser(username: test, password: "password", email: "test@test.com") {
                 user {
                 userId
                 username
@@ -2150,3 +2150,48 @@ def test_delete_session_exercise_fail_nonexistent_id():
                                     'message': 'SessionLog_Exercise matching query does not exist.',
                                     'path': ['deleteSessionExercise']}]
                         }  
+
+
+@pytest.mark.django_db
+def test_create_user_no_email():
+
+    mutation = '''
+        mutation  {
+            createUser(username: "test", password:"password") {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+
+    assert executed == {'data': None,
+                        'errors': [{'locations': [{'column': 13, 'line': 3}],
+                                    'message': "Field 'createUser' argument 'email' of type 'String!' "
+                                    'is required, but it was not provided.'}]}
+
+@pytest.mark.django_db
+def test_create_user_no_password():
+
+    mutation = '''
+        mutation  {
+            createUser(username: "test", email:"email@email.com") {
+                user {
+                userId
+                username
+                }
+            }
+        }
+    '''
+
+    client = Client(schema)
+    executed = client.execute(mutation)
+
+    assert executed == {'data': None,
+                        'errors': [{'locations': [{'column': 13, 'line': 3}],
+                                    'message': "Field 'createUser' argument 'password' of type 'String!' "
+                                    'is required, but it was not provided.'}]}

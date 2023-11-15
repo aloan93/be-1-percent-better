@@ -1,13 +1,13 @@
 from graphene.test import Client
 from api.schema import schema
-from api.models import User, Exercise, WorkoutLog, SessionLog
+from api.models import ExtendUser, Exercise, WorkoutLog, SessionLog
 import pytest
 
 @pytest.mark.django_db
 def test_get_all_users():
   
-    user1 = User.objects.create(username='user1')
-    user2 = User.objects.create(username='user2')
+    user1 = ExtendUser.objects.create(username='user1', password='password', email='testuser@test.com')
+    user2 = ExtendUser.objects.create(username='user2', password='password', email='testuser@test.com')
    
     query = '''
         query {
@@ -32,7 +32,7 @@ def test_get_all_users():
 
 @pytest.mark.django_db
 def test_get_all_exercises():
-    user = User.objects.create(username='testuser')
+    user = ExtendUser.objects.create(username='testuser', password='password', email='testuser@test.com')
 
     exercise1 = Exercise.objects.create(user_id=user, external_exercise_id='1234', external_exercise_name='Squat', external_exercise_bodypart='Lower Legs', personal_best=0)
     exercise2 = Exercise.objects.create(user_id=user, external_exercise_id='5678', external_exercise_name='Bicep curl', external_exercise_bodypart='Upper Arms', personal_best=0)
@@ -107,8 +107,8 @@ def test_get_all_exercises_is_empty():
 @pytest.mark.django_db
 def test_get_users_by_user_id():
     
-    testuser1 = User.objects.create(username='testuser1')
-    testuser2 = User.objects.create(username='testuser2')
+    testuser1 = ExtendUser.objects.create(username='testuser1', password='password', email='testuser@test.com')
+    testuser2 = ExtendUser.objects.create(username='testuser2', password='password', email='testuser@test.com')
     
    
     query = '''
@@ -156,7 +156,7 @@ def test_get_users_by_nonexistent_user_id():
         'locations': [{
                         'column': 17,
                         'line': 3}],
-            'message': 'User matching query does not exist.',
+            'message': 'ExtendUser matching query does not exist.',
             'path': ['getUserByUserId']}]
     
 
@@ -189,7 +189,7 @@ def test_get_users_by_invalid_string_user_id():
 @pytest.mark.django_db
 def test_get_exercise_by_exercise_id():
 
-    testuserjim = User.objects.create(username='jimsgains')
+    testuserjim = ExtendUser.objects.create(username='jimsgains', password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuserjim, external_exercise_id='1004', external_exercise_name='Leg Press', external_exercise_bodypart='Lower Legs', personal_best=0)
    
     query = '''
@@ -364,7 +364,7 @@ def test_get_exercise_by_blank_exercise_id():
 @pytest.mark.django_db
 def test_get_exercises_by_user_id():
 
-    testuserjill = User.objects.create(username='jillsgains')
+    testuserjill = ExtendUser.objects.create(username='jillsgains', password='password', email='testuser@test.com')
 
     testexercise = Exercise.objects.create(user_id=testuserjill, external_exercise_id='1004', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=10)
     testexercise2 = Exercise.objects.create(user_id=testuserjill, external_exercise_id='1024', external_exercise_name='Sumo Squat', external_exercise_bodypart='Upper Legs', personal_best=10)
@@ -492,7 +492,7 @@ def test_get_all_sessions_is_empty():
 @pytest.mark.django_db
 def test_get_all_sessions():
 
-    testusercraig = User.objects.create(username='craigsgains')
+    testusercraig = ExtendUser.objects.create(username='craigsgains', password='password', email='testuser@test.com')
 
     testsession = SessionLog.objects.create(user_id=testusercraig, session_name="Leg Day")
 
@@ -527,7 +527,7 @@ def test_get_all_sessions():
 @pytest.mark.django_db
 def test_get_sessions_by_user_id():
 
-    testuser = User.objects.create(username="testing")
+    testuser = ExtendUser.objects.create(username="testing", password='password', email='testuser@test.com')
 
     testsession = SessionLog.objects.create(user_id=testuser, session_name="Test Chest Day")
 
@@ -605,7 +605,7 @@ def test_get_sessions_by_invalid_user_id():
 @pytest.mark.django_db
 def test_get_session_by_session_id():
 
-    testuser = User.objects.create(username="testing")
+    testuser = ExtendUser.objects.create(username="testing", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuser, session_name="Test Leg Day")
 
     query = '''
@@ -723,8 +723,8 @@ def test_get_all_workouts_is_empty():
 @pytest.mark.django_db
 def test_get_all_workouts():
 
-    testuserjames = User.objects.create(username='jamesgains')
-    me = User.objects.get(username="jamesgains")
+    testuserjames = ExtendUser.objects.create(username='jamesgains', password='password', email='testuser@test.com')
+    me = ExtendUser.objects.get(username="jamesgains", password='password', email='testuser@test.com')
 
     workoutexercise = Exercise.objects.create(user_id=me, external_exercise_id='1304', external_exercise_name='Glute Bridge Test', external_exercise_bodypart='Upper Legs', personal_best=20)
     testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 12, sets=3, weight_kg=20)
@@ -773,7 +773,7 @@ def test_get_all_workouts():
 @pytest.mark.django_db
 def test_get_workout_by_workout_id():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
 
     workoutexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='1304', external_exercise_name='Glute Band Test', external_exercise_bodypart='Upper Legs', personal_best=10)
     testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 10, sets=3, weight_kg=10)
@@ -927,7 +927,7 @@ def test_get_workouts_by_exercise_id_empty():
 @pytest.mark.django_db
 def test_get_workouts_by_exercise_id():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
 
     workoutexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='1304', external_exercise_name='Glute Band Test', external_exercise_bodypart='Upper Legs', personal_best=10)
     testworkout = WorkoutLog.objects.create(exercise_id=workoutexercise, reps= 10, sets=3, weight_kg=10)
@@ -1098,7 +1098,7 @@ def test_create_invalid_user():
 @pytest.mark.django_db
 def test_update_user_username():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
 
     mutation = '''
         mutation  {
@@ -1148,7 +1148,7 @@ def test_update_nonexistent_user_username():
         'errors': [{'locations': [{'column': 13,
                                    'line': 3
                                     }],
-                    'message': 'User matching query does not exist.',
+                    'message': 'ExtendUser matching query does not exist.',
                     'path': ['updateUser'],
                     }]
         }
@@ -1179,7 +1179,7 @@ def test_update_nonexistent_user_username():
 @pytest.mark.django_db
 def test_delete_user_username():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
 
     mutation = '''
         mutation  {  
@@ -1195,7 +1195,6 @@ def test_delete_user_username():
     query = '''
         query {
             getAllUsers {
-                userId
                 username
             }
         }
@@ -1206,14 +1205,14 @@ def test_delete_user_username():
     client.execute(mutation)
     deleted = client.execute(query)
   
-    assert executed == {'data': {'getAllUsers': [{'userId': '21', 'username': 'janesgains'}]}}
+    assert executed == {'data': {'getAllUsers': [{'username': 'janesgains'}]}}
     assert deleted == {'data': {'getAllUsers': []}}
 
 
 @pytest.mark.django_db
 def test_create_exercise():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
 
     mutation = '''
         mutation  {
@@ -1241,9 +1240,8 @@ def test_create_exercise():
     client = Client(schema)
     executed = client.execute(mutation)
     
-    data = executed['data']
 
-    assert data['createExercise'] == {'exercise': 
+    assert executed == {'data': {'createExercise': {'exercise': 
                                       {'exerciseId': '13', 
                                        'externalExerciseBodypart': 'waist',
                                         'externalExerciseId': '2000', 
@@ -1253,6 +1251,7 @@ def test_create_exercise():
                                              'userId':'22',
                                              'username': 'janesgains'
                                             }
+                                        }} 
                                         }
                                     }
 
@@ -1295,7 +1294,7 @@ def test_create_exercise_no_user():
 @pytest.mark.django_db
 def test_create_exercise_nonexistent_user():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
 
     mutation = '''
         mutation  {
@@ -1326,14 +1325,14 @@ def test_create_exercise_nonexistent_user():
                                 'column': 13,
                                 'line': 3
                                 }],
-                            'message': 'User matching query does not exist.',
+                            'message': 'ExtendUser matching query does not exist.',
                             'path': ['createExercise']
                         }]}
     
 @pytest.mark.django_db
 def test_update_exercise():
 
-    testuser = User.objects.create(username="tester")
+    testuser = ExtendUser.objects.create(username="tester", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     mutation = '''
@@ -1365,7 +1364,7 @@ def test_update_exercise():
 @pytest.mark.django_db
 def test_update_exercise_nonexistent_exercise_id():
 
-    testuser = User.objects.create(username="tester")
+    testuser = ExtendUser.objects.create(username="tester", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     mutation = '''
@@ -1397,7 +1396,7 @@ def test_update_exercise_nonexistent_exercise_id():
 @pytest.mark.django_db
 def test_update_exercise_without_pb():
 
-    testuser = User.objects.create(username="tester")
+    testuser = ExtendUser.objects.create(username="tester", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     mutation = '''
@@ -1428,7 +1427,7 @@ def test_update_exercise_without_pb():
 @pytest.mark.django_db
 def test_update_exercise_invalid_pb():
 
-    testuser = User.objects.create(username="tester")
+    testuser = ExtendUser.objects.create(username="tester", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     mutation = '''
@@ -1458,7 +1457,7 @@ def test_update_exercise_invalid_pb():
 @pytest.mark.django_db
 def test_delete_exercise():
 
-    testuser = User.objects.create(username="janesgains")
+    testuser = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     query = '''
@@ -1495,7 +1494,7 @@ def test_delete_exercise():
 @pytest.mark.django_db
 def test_delete_exercise_nonexistent_id():
 
-    testuser = User.objects.create(username="janesgains")
+    testuser = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     query = '''
@@ -1538,7 +1537,7 @@ def test_delete_exercise_nonexistent_id():
 @pytest.mark.django_db
 def test_create_workout():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     mutation = '''
@@ -1572,7 +1571,7 @@ def test_create_workout():
 @pytest.mark.django_db
 def test_create_workout_fail_missing_id():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     mutation = '''
@@ -1600,7 +1599,7 @@ def test_create_workout_fail_missing_id():
 @pytest.mark.django_db
 def test_create_workout_fail_missing_fields():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
     missingsets = '''
@@ -1671,7 +1670,7 @@ def test_create_workout_fail_missing_fields():
 @pytest.mark.django_db
 def test_update_workout():
 
-    testuser = User.objects.create(username="tester")
+    testuser = ExtendUser.objects.create(username="tester", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
     testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
 
@@ -1704,7 +1703,7 @@ def test_update_workout():
 @pytest.mark.django_db
 def test_update_workout_fail_no_sets():
 
-    testuser = User.objects.create(username="tester")
+    testuser = ExtendUser.objects.create(username="tester", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
     testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
 
@@ -1757,7 +1756,7 @@ def test_update_workout_fail_nonexistent_id():
 @pytest.mark.django_db
 def test_delete_workout():
 
-    testuser = User.objects.create(username="janesgains")
+    testuser = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
     testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
     
@@ -1792,7 +1791,7 @@ def test_delete_workout():
 @pytest.mark.django_db
 def test_delete_workout_nonexistent_id():
 
-    testuser = User.objects.create(username="janesgains")
+    testuser = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testexercise = Exercise.objects.create(user_id=testuser, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
     testworkout = WorkoutLog.objects.create(exercise_id=testexercise, reps= 10, sets=3, weight_kg=10)
 
@@ -1820,7 +1819,7 @@ def test_delete_workout_nonexistent_id():
 @pytest.mark.django_db
 def test_create_session():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     
     mutation = '''
         mutation  {
@@ -1866,14 +1865,14 @@ def test_create_session_nonexistent_id():
     assert executed == {'data': {'createSession': None},
                         'errors': [{'locations': [{'column': 13,
                                                    'line': 3}],
-                                     'message': 'User matching query does not exist.',
+                                     'message': 'ExtendUser matching query does not exist.',
                                      'path': ['createSession']}],
     } 
 
 @pytest.mark.django_db
 def test_update_session():
     
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
 
     mutation = '''
@@ -1925,7 +1924,7 @@ def test_update_session_invalid_id():
 @pytest.mark.django_db
 def test_update_session_invalid_name():
     
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
 
     mutation = '''
@@ -1950,7 +1949,7 @@ def test_update_session_invalid_name():
 @pytest.mark.django_db
 def test_delete_session():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
 
     query = '''
@@ -1984,7 +1983,7 @@ def test_delete_session():
 @pytest.mark.django_db
 def test_delete_session_fail_nonexistent_id():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
 
     query = '''
@@ -2018,7 +2017,7 @@ def test_delete_session_fail_nonexistent_id():
 @pytest.mark.django_db
 def test_create_session_log():
     
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
@@ -2040,7 +2039,7 @@ def test_create_session_log():
 @pytest.mark.django_db
 def test_create_session_log_fail_nonexistent_ids():
     
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
@@ -2077,7 +2076,7 @@ def test_create_session_log_fail_nonexistent_ids():
 @pytest.mark.django_db
 def test_delete_session_exercise():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
@@ -2114,7 +2113,7 @@ def test_delete_session_exercise():
 @pytest.mark.django_db
 def test_delete_session_exercise_fail_nonexistent_id():
 
-    testuserjane = User.objects.create(username="janesgains")
+    testuserjane = ExtendUser.objects.create(username="janesgains", password='password', email='testuser@test.com')
     testsession = SessionLog.objects.create(user_id=testuserjane, session_name="Test Leg Day")
     testexercise = Exercise.objects.create(user_id=testuserjane, external_exercise_id='2104', external_exercise_name='Leg Press', external_exercise_bodypart='Upper Legs', personal_best=0)
 
@@ -2150,4 +2149,4 @@ def test_delete_session_exercise_fail_nonexistent_id():
                         'errors': [{'locations': [{'column': 15, 'line': 3}],
                                     'message': 'SessionLog_Exercise matching query does not exist.',
                                     'path': ['deleteSessionExercise']}]
-                        }
+                        }  

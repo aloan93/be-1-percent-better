@@ -2,7 +2,7 @@
 
 A GraphQL API that functions as the backend for the 1 Percent Better workout tracker for mobile.
 
-Hosted here --> https://one-percent-better-api-7up3.onrender.com/api
+Hosted here --> https://one-percent-better-api-7up3.onrender.com/api/
 
 If you would like to explore this repository and application on your local machine you can follow the steps outlined below.
 
@@ -48,22 +48,34 @@ To install the required dependencies for this project you can enter the followin
 pip3 install -r requirements.txt
 ```
 
+PLEASE NOTE - if you get any errors concerning 'pkg-config', you can run the following command as a fix:
+
+```
+sudo apt-get install python3-dev default-libmysqlclient-dev build-essential pkg-config
+```
+
 ### Step 4: Setting Up a Environment File
 
-To protect sensitive information, such as database credentials, create a file called '.env' in the root of the repository. Within this you will need to insert the following:
+To protect sensitive information, such as database credentials, create a file called '.env' in the root of the repository. Within this you will need to insert the following (with your own values):
 
 ```
-DB_NAME=<database-name>
-DB_USER=<database-user>
-DB_PASSWORD=<database-password>
-DB_HOST=<database-host>
-DB_PORT=<database-port>
+DB_NAME=my-bd
+DB_USER=test-user
+DB_PASSWORD=mysecurepassword
+DB_HOST=127.0.0.1
+DB_PORT=3306
 
-SECRET_KEY=<django-secret-key>
-DEBUG=<boolean-value>
+SECRET_KEY=see-explanation-below
+DEBUG=True
 ```
 
-Please note that the settings of this repository are pre-set to accommodate a MySQL database. If you wish to use a different db platform you will need to make relevant changes.
+To generate your own secret key you can eneter the following command in your terminal:
+
+```
+python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
+
+PLEASE NOTE - the settings of this repository are pre-set to accommodate a MySQL database. If you wish to use a different db platform you will need to make relevant changes. Debug must be set to True (as above) for local development. DB_HOST must be set specifically to 127.0.0.1 if intending to locally host your database.
 
 ### Step 5: Making Migrations
 
@@ -79,9 +91,11 @@ python3 manage.py migrate
 You can now run the application on your local machine using the following terminal command:
 
 ```
-python3 manage.py runserver
+python3 manage.py runserver 0.0.0.0:8000
 ```
 
-Upon success you will be presented with a local host link (typically via port 8000) which you can navigate to by control clicking should it not open in your browser automatically.
+Upon success you will be presented with a local host link which you can navigate to by control clicking should it not open in your browser automatically. Once in your browser you will need to go to localhost:8000/api as the default landing page currently gives a 404 error.
+
+PLEASE NOTE - due to default security settings, local host is recommended via port 8000 - hense the command above.
 
 ### And Done! Happy Exploring

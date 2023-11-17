@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 'changeme'
+      MYSQL_DATABASE: 'northcoders'
+      MYSQL_USER: 'northcoders'
+      MYSQL_PASSWORD: 'changeme'
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  onepercent:
+    build: .
+    image: onepercent
+
+    env_file:
+      - ./.env
+    depends_on:
+      - mysql
+    ports:
+      - 8000:8000
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DEBUG: "True"
+    restart: unless-stopped
